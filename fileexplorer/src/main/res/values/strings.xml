@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Tiny Files</string>
+    <string name="storage_internal">Internal storage</string>
+    <string name="storage_sd_card">SD Card</string>
+    <string name="root_directory">Root</string>
+</resources>

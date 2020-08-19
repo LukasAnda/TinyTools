@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference android:key="sample"
+        android:title="This is the sample preference"
+        app:icon="@drawable/ic_palette"/>
+</androidx.preference.PreferenceScreen>

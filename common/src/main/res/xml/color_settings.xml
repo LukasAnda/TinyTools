@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/color">
+
+    <com.skydoves.colorpickerpreference.ColorPickerPreference
+        android:key="@string/primary_color_preference_key"
+        android:title="Primary color"
+        android:summary="Changes primary color"
+        app:preference_dialog_title="Choose your primary color"
+        app:preference_dialog_positive="Ok"
+        app:preference_attachAlphaSlideBar="false"
+        app:preference_colorBox_radius="16dp"
+        app:preference_dialog_negative="Cancel"
+        app:preference_palette="@drawable/palette"
+        app:preference_selector="@drawable/wheel"
+        app:default_color="@color/colorPrimary"/>
+
+    <com.skydoves.colorpickerpreference.ColorPickerPreference
+        android:key="@string/secondary_color_preference_key"
+        android:title="Secondary color"
+        android:summary="Changes secondary color"
+        app:preference_dialog_title="Choose your primary color"
+        app:preference_dialog_positive="Ok"
+        app:preference_attachAlphaSlideBar="false"
+        app:preference_colorBox_radius="16dp"
+        app:preference_dialog_negative="Cancel"
+        app:preference_palette="@drawable/palette"
+        app:preference_selector="@drawable/wheel"
+        app:default_color="@color/colorSecondary"/>
+    </PreferenceCategory>
+</androidx.preference.PreferenceScreen>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="color">Colors</string>
+    <string name="primary_color_preference_key">primaryColor</string>
+    <string name="secondary_color_preference_key">secondaryColor</string>
+    <string name="color_navigation_bar_key">navigationBarColor</string>
+    <string name="navigation_bar_color_title">Navigation bar color</string>
+</resources>
