@@ -1,20 +1,33 @@
 package com.tinytools.files.filesystem
 
 import android.content.Context
+import com.tinytools.files.R
+import com.tinytools.files.helpers.formatAsFileSize
+import com.tinytools.files.model.ui.HybridFileItem
+import com.tinytools.files.model.ui.Icon
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 
-open class HybridFile(open var path: String){
+open class HybridFile(open var path: String) {
     fun getTypedFile(context: Context): HybridFile {
-        return when{
+        return when {
             FileUtil.isOnExtSdCard(File(path), context) -> LocalFile(path)
             else -> LocalFile(path)
         }
     }
 
     open fun lastModified(): Long = 0
-    open fun size(context: Context): Long = 0
+    open suspend fun size(context: Context): Long = 0
+    suspend fun readableSize(context: Context): String {
+        val size = size(context)
+        return if (isDirectory(context)) {
+            context.resources.getQuantityString(R.plurals.folder_size, size.toInt(), size.toInt())
+        } else {
+            size.formatAsFileSize
+        }
+    }
+
     open fun name(context: Context): String = ""
     open fun parent(context: Context): String = ""
     open fun isDirectory(context: Context): Boolean = false
@@ -27,4 +40,6 @@ open class HybridFile(open var path: String){
     open fun setLastModified(lastModified: Long): Boolean = false
     open fun mkdirs(context: Context): Boolean = false
     open fun delete(context: Context): Boolean = false
+
+    suspend fun toVisualItem(context: Context) = HybridFileItem(name(context), Icon(), readableSize(context), this, "")
 }

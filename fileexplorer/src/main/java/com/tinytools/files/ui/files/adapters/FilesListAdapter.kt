@@ -10,11 +10,12 @@ import com.tinytools.common.adapter.create
 import com.tinytools.files.databinding.FilesItemGridBinding
 import com.tinytools.files.databinding.FilesItemLinearBinding
 import com.tinytools.files.filesystem.HybridFile
+import com.tinytools.files.model.ui.HybridFileItem
 import com.tinytools.files.ui.files.adapters.FilesListAdapter.FilesItemHolder.FilesGridHolder
 import com.tinytools.files.ui.files.adapters.FilesListAdapter.FilesItemHolder.FilesLinearHolder
 import com.tinytools.files.ui.files.adapters.FilesListAdapter.ViewType.*
 
-class FilesListAdapter(private val layoutManager: GridLayoutManager, handler: FilesListAdapterHandler) : BindingRecyclerAdapter<HybridFile, FilesListAdapter.FilesItemHolder>(handler) {
+class FilesListAdapter(private val layoutManager: GridLayoutManager, handler: FilesListAdapterHandler) : BindingRecyclerAdapter<HybridFileItem, FilesListAdapter.FilesItemHolder>(handler) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType.toViewType()) {
         LINEAR -> parent.create(::FilesLinearHolder, FilesItemLinearBinding::inflate)
@@ -34,11 +35,12 @@ class FilesListAdapter(private val layoutManager: GridLayoutManager, handler: Fi
 
     private fun Int.toViewType() = values()[this]
 
-    sealed class FilesItemHolder(binding: ViewBinding) : BindingViewHolder<HybridFile, ViewBinding>(binding) {
+    sealed class FilesItemHolder(binding: ViewBinding) : BindingViewHolder<HybridFileItem, ViewBinding>(binding) {
         class FilesLinearHolder(binding: ViewBinding) : FilesItemHolder(binding) {
-            override fun bind(item: HybridFile, handler: BindingViewHolderHandler) {
+            override fun bind(item: HybridFileItem, handler: BindingViewHolderHandler) {
                 (binding as? FilesItemLinearBinding)?.let {
-                    binding.text.text = item.name(binding.root.context)
+                    binding.text.text = item.name
+                    binding.size.text = item.size
                     binding.root.setOnClickListener {
                         (handler as? FilesListAdapterHandler)?.onFileSelected(item)
                     }
@@ -48,9 +50,9 @@ class FilesListAdapter(private val layoutManager: GridLayoutManager, handler: Fi
         }
 
         class FilesGridHolder(binding: ViewBinding) : FilesItemHolder(binding) {
-            override fun bind(item: HybridFile, handler: BindingViewHolderHandler) {
+            override fun bind(item: HybridFileItem, handler: BindingViewHolderHandler) {
                 (binding as? FilesItemGridBinding)?.let {
-                    binding.text.text = item.name(binding.root.context)
+                    binding.text.text = item.name
                     binding.root.setOnClickListener {
                         (handler as? FilesListAdapterHandler)?.onFileSelected(item)
                     }
@@ -61,6 +63,6 @@ class FilesListAdapter(private val layoutManager: GridLayoutManager, handler: Fi
     }
 
     interface FilesListAdapterHandler : BindingViewHolderHandler {
-        fun onFileSelected(path: HybridFile)
+        fun onFileSelected(path: HybridFileItem)
     }
 }

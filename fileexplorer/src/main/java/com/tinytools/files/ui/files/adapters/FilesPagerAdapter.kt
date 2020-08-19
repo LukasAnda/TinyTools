@@ -7,6 +7,7 @@ import com.tinytools.common.adapter.BindingViewHolderHandler
 import com.tinytools.common.adapter.create
 import com.tinytools.files.databinding.FilesPageItemBinding
 import com.tinytools.files.filesystem.HybridFile
+import com.tinytools.files.model.ui.HybridFileItem
 import com.tinytools.files.model.ui.PageConfig
 import com.tinytools.files.model.ui.PageStyle
 import java.io.File
@@ -38,7 +39,7 @@ class FilesPagerAdapter(handler: FilesPageAdapterHandler): BindingRecyclerAdapte
         }
     }
 
-    fun swapPageData(page: Int, newItems: List<HybridFile>){
+    fun swapPageData(page: Int, newItems: List<HybridFileItem>){
         items[page].adapter.swapData(newItems)
     }
 

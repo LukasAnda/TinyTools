@@ -3,13 +3,16 @@ package com.tinytools.files.filesystem
 import android.content.Context
 import java.io.File
 import java.io.FileInputStream
-import java.io.InputStream
-import java.io.OutputStream
 
 data class LocalFile(override var path: String) : HybridFile(path) {
     override fun lastModified() = File(path).lastModified()
 
-    override fun size(context: Context) = File(path).length()
+    override suspend fun size(context: Context) = if (isDirectory(context)) {
+        // This can lead to funny recursion, maybe we need to optimize a little bit
+        listFiles(context, true).size.toLong()
+    } else {
+        File(path).length()
+    }
 
     override fun name(context: Context) = path.substringAfterLast("/")
 
@@ -22,9 +25,7 @@ data class LocalFile(override var path: String) : HybridFile(path) {
     override fun totalSpace(context: Context) = File(path).totalSpace
 
     override suspend fun listFiles(context: Context, showHidden: Boolean): List<HybridFile> = File(path)
-            .takeIf {
-                it.exists() && it.isDirectory
-            } // We skip the code if we can not list files using java api
+            .takeIf { it.exists() && it.isDirectory } // We skip the code if we can not list files using java api
             ?.listFiles() // List file
             ?.filter { showHidden || !it.isHidden } // Filter all if OR ShowHidden OR file is explicitely NOT hidden, (therefore filter not hidden files)
             ?.map { HybridFile(it.path) } // Parse it to Hybrid file

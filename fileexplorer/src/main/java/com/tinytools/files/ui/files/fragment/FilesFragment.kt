@@ -11,6 +11,7 @@ import androidx.viewpager2.widget.ViewPager2
 import com.tinytools.common.fragments.BaseFragment
 import com.tinytools.files.databinding.FilesFragmentBinding
 import com.tinytools.files.filesystem.HybridFile
+import com.tinytools.files.model.ui.HybridFileItem
 import com.tinytools.files.model.ui.PageConfig
 import com.tinytools.files.model.ui.PageStyle
 import com.tinytools.files.ui.files.adapters.FilesListAdapter
@@ -29,8 +30,8 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(){
 
     //region Listeners
     private val fileListHandler: FilesListAdapter.FilesListAdapterHandler = object : FilesListAdapter.FilesListAdapterHandler {
-        override fun onFileSelected(path: HybridFile) {
-            viewModel.listFiles(currentPage, path)
+        override fun onFileSelected(path: HybridFileItem) {
+            viewModel.listFiles(currentPage, path.file)
         }
     }
     //endregion

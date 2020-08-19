@@ -8,16 +8,17 @@ import androidx.lifecycle.viewModelScope
 import com.tinytools.common.viewmodel.BaseViewModel
 import com.tinytools.files.filesystem.HybridFile
 import com.tinytools.files.filesystem.getStorageDirectories
+import com.tinytools.files.model.ui.HybridFileItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 
 class FilesFragmentViewModel(application: Application) : BaseViewModel(application) {
-    private val pageItems = MutableLiveData<Pair<Int, List<HybridFile>>>()
+    private val pageItems = MutableLiveData<Pair<Int, List<HybridFileItem>>>()
     private val directories = mutableMapOf<Int, HybridFile>()
 
     fun pageCount() = 2
-    fun pageItems(): LiveData<Pair<Int, List<HybridFile>>> = pageItems
+    fun pageItems(): LiveData<Pair<Int, List<HybridFileItem>>> = pageItems
 
     //TODO consider preferences
     fun savedDirectories() = (0 until pageCount())
@@ -30,7 +31,7 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
         viewModelScope.launch(Dispatchers.IO) {
             val file = File(directory.path)
             Log.d("TAG", "File: ${file.path}, isDirectory: ${file.isDirectory}, canRead: ${file.canRead()}, listFiles: ${file.listFiles()?.joinToString("\n")}}")
-            val files = directory.listFiles(context, true)
+            val files = directory.listFiles(context, true).map { it.toVisualItem(context) }
             pageItems.postValue(Pair(page, files))
         }
     }
