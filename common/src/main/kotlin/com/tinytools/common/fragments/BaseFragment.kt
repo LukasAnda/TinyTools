@@ -50,6 +50,10 @@ abstract class BaseFragment<VIEW_BINDING : ViewBinding> : Fragment() {
         }
     }
 
+    fun requestAfterSaf() {
+
+    }
+
     open fun showInfoDialog(message: Int) {
 
     }

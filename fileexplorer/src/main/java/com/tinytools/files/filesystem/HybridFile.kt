@@ -19,6 +19,7 @@ open class HybridFile(open var path: String) {
 
     open fun lastModified(): Long = 0
     open suspend fun size(context: Context): Long = 0
+
     suspend fun readableSize(context: Context): String {
         val size = size(context)
         return if (isDirectory(context)) {
