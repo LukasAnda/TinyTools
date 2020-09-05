@@ -83,9 +83,9 @@ dependencies {
     api 'androidx.room:room-ktx:2.2.5'
 
     // Dependency injection
-    api "org.koin:koin-core:2.1.5"
-    api "org.koin:koin-android:2.1.5"
-    api "org.koin:koin-androidx-viewmodel:2.1.5"
+    api "org.koin:koin-core:2.2.0-alpha-1"
+    api "org.koin:koin-android:2.2.0-alpha-1"
+    api "org.koin:koin-androidx-viewmodel:2.2.0-alpha-1"
 
     api 'com.github.bumptech.glide:glide:4.11.0'
     kapt 'com.github.bumptech.glide:compiler:4.10.0'

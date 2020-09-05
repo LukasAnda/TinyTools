@@ -121,7 +121,7 @@ class RecyclicalSetup internal constructor(
   /** This should not be called directly. */
   @RestrictTo(LIBRARY) fun registerItemDefinition(
     layoutBinding: (LayoutInflater, ViewGroup, Boolean) -> ViewBinding,
-    definition: ItemDefinition<*, *, *>
+    definition: ItemDefinition<*, *>
   ) = itemGraph.register(layoutBinding, definition)
 
   internal fun toAttached(): RecyclicalHandle {

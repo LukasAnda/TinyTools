@@ -27,91 +27,88 @@ import com.tinytools.common.recyclical.ItemDefinition
 import com.tinytools.common.recyclical.RecycledCallback
 import com.tinytools.common.recyclical.RecyclicalMarker
 import com.tinytools.common.recyclical.RecyclicalSetup
+import com.tinytools.common.recyclical.ViewBinder
 import com.tinytools.common.recyclical.ViewHolder
-import com.tinytools.common.recyclical.ViewHolderBinder
 import com.tinytools.common.recyclical.datasource.DataSource
 import com.tinytools.common.recyclical.internal.Debouncer
 import com.tinytools.common.recyclical.viewholder.SelectionStateProvider
 
 /** @author Aidan Follestad (@afollestad) */
 @RecyclicalMarker
-class RealItemDefinition<out IT : Any, VH : ViewHolder, VB : ViewBinding>(
-  internal val setup: RecyclicalSetup,
-  val itemClassName: String
-) : ItemDefinition<IT, VH, VB> {
+class RealItemDefinition<IT : Any, VB : ViewBinding>(
+        internal val setup: RecyclicalSetup,
+        val itemClassName: String
+) : ItemDefinition<IT, VB> {
 
-  /** The current data source set in setup. */
-  val currentDataSource: DataSource<*>?
-    get() = setup.currentDataSource
+    /** The current data source set in setup. */
+    val currentDataSource: DataSource<*>?
+        get() = setup.currentDataSource
 
-  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-  internal var itemOnClick: ItemClickListener<Any>? = null
-  @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-  internal var itemOnLongClick: ItemClickListener<Any>? = null
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal var itemOnClick: ItemClickListener<Any>? = null
 
-  internal var creator: ((layoutBinding: VB) -> VH)? = null
-  internal var binder: ViewHolderBinder<*, *>? = null
-  internal var idGetter: IdGetter<Any>? = null
-  internal var onRecycled: RecycledCallback<Any>? = null
+    @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
+    internal var itemOnLongClick: ItemClickListener<Any>? = null
 
-  var childClickDataList = mutableListOf<ChildClickData<*, *, *>>()
+    //  internal var creator: ((layoutBinding: VB) -> VH)? = null
+    internal var binder:ViewBinder<*, *>? = null
+    internal var idGetter: IdGetter<Any>? = null
+    internal var onRecycled: RecycledCallback<Any>? = null
 
-  override fun onBind(
-    viewHolderCreator: (layoutBinding: VB) -> VH,
-    block: ViewHolderBinder<VH, IT>
-  ): ItemDefinition<IT, VH, VB> {
-    this.creator = viewHolderCreator
-    this.binder = block
-    return this
-  }
+    var childClickDataList = mutableListOf<ChildClickData<*, *, *>>()
 
-  override fun onClick(block: ItemClickListener<IT>): ItemDefinition<IT, VH, VB> {
-    this.itemOnClick = (block as SelectionStateProvider<Any>.(Int) -> Unit)
-    return this
-  }
-
-  override fun onLongClick(block: ItemClickListener<IT>): ItemDefinition<IT, VH, VB> {
-    this.itemOnLongClick = (block as SelectionStateProvider<Any>.(Int) -> Unit)
-    return this
-  }
-
-  override fun hasStableIds(idGetter: IdGetter<IT>): ItemDefinition<IT, VH, VB> {
-    this.idGetter = idGetter as IdGetter<Any>
-    return this
-  }
-
-  override fun onRecycled(block: RecycledCallback<VH>) {
-    this.onRecycled = block as RecycledCallback<Any>
-  }
-
-  internal val viewClickListener = View.OnClickListener { itemView ->
-    if (Debouncer.canPerform(itemView)) {
-      val position = itemView.viewHolder()
-          .adapterPosition
-      getSelectionStateProvider(position).use {
-        this.itemOnClick?.invoke(it, position)
-        setup.globalOnClick?.invoke(it, position)
-      }
+    override fun onBind(block: ViewBinder<IT, VB>): ItemDefinition<IT, VB> {
+        this.binder = block as ViewBinder<*, *>
+        return this
     }
-  }
 
-  internal val viewLongClickListener = View.OnLongClickListener { itemView ->
-    if (Debouncer.canPerform(itemView)) {
-      val position = itemView.viewHolder()
-          .adapterPosition
-      getSelectionStateProvider(position)
-          .use {
-            this.itemOnLongClick?.invoke(it, position)
-            setup.globalOnLongClick?.invoke(it, position)
-          }
+    override fun onClick(block: ItemClickListener<IT>): ItemDefinition<IT, VB> {
+        this.itemOnClick = (block as SelectionStateProvider<Any>.(Int) -> Unit)
+        return this
     }
-    true
-  }
 
-  /** @author Aidan Follestad (@afollestad) */
-  data class ChildClickData<in IT : Any, VB : ViewBinding, VT : View>(
-    val viewBindingType: Class<VB>,
-    val child: (viewBinding: VB) -> VT,
-    val callback: ChildViewClickListener<IT, VT>
-  )
+    override fun onLongClick(block: ItemClickListener<IT>): ItemDefinition<IT, VB> {
+        this.itemOnLongClick = (block as SelectionStateProvider<Any>.(Int) -> Unit)
+        return this
+    }
+
+    override fun hasStableIds(idGetter: IdGetter<IT>): ItemDefinition<IT, VB> {
+        this.idGetter = idGetter as IdGetter<Any>
+        return this
+    }
+
+    override fun onRecycled(block: RecycledCallback<ViewHolder>) {
+        this.onRecycled = block as RecycledCallback<Any>
+    }
+
+    internal val viewClickListener = View.OnClickListener { itemView ->
+        if (Debouncer.canPerform(itemView)) {
+            val position = itemView.viewHolder()
+                    .adapterPosition
+            getSelectionStateProvider(position).use {
+                this.itemOnClick?.invoke(it, position)
+                setup.globalOnClick?.invoke(it, position)
+            }
+        }
+    }
+
+    internal val viewLongClickListener = View.OnLongClickListener { itemView ->
+        if (Debouncer.canPerform(itemView)) {
+            val position = itemView.viewHolder()
+                    .adapterPosition
+            getSelectionStateProvider(position)
+                    .use {
+                        this.itemOnLongClick?.invoke(it, position)
+                        setup.globalOnLongClick?.invoke(it, position)
+                    }
+        }
+        true
+    }
+
+    /** @author Aidan Follestad (@afollestad) */
+    data class ChildClickData<in IT : Any, VB : ViewBinding, VT : View>(
+            val viewBindingType: Class<VB>,
+            val child: (viewBinding: VB) -> VT,
+            val callback: ChildViewClickListener<IT, VT>
+    )
 }

@@ -34,13 +34,13 @@ class ItemGraph {
   @VisibleForTesting
   internal val itemTypeToLayout = mutableMapOf<Int, (LayoutInflater, ViewGroup, Boolean) -> ViewBinding>()
   @VisibleForTesting
-  internal var itemTypeToDefinition = mutableMapOf<Int, ItemDefinition<*, *, *>>()
+  internal var itemTypeToDefinition = mutableMapOf<Int, ItemDefinition<*, *>>()
 
   private var itemClassToType = mutableMapOf<String, Int>()
 
   fun register(
     layoutBinding: (LayoutInflater, ViewGroup, Boolean) -> ViewBinding,
-    definition: ItemDefinition<*, *, *>
+    definition: ItemDefinition<*, *>
   ) {
     val itemClassName = definition.realDefinition()
         .itemClassName
@@ -57,13 +57,13 @@ class ItemGraph {
     )
   }
 
-  @CheckResult fun definitionForType(type: Int): ItemDefinition<*, *, *> {
+  @CheckResult fun definitionForType(type: Int): ItemDefinition<*, *> {
     return itemTypeToDefinition[type] ?: error(
         "Didn't find any definitions for type $type"
     )
   }
 
-  @CheckResult fun definitionForName(name: String): ItemDefinition<*, *, *> {
+  @CheckResult fun definitionForName(name: String): ItemDefinition<*, *> {
     val type = itemClassToType[name] ?: error(
         "Didn't find item type for class $name"
     )

@@ -17,4 +17,4 @@ package com.tinytools.common.recyclical
 
 import androidx.viewbinding.ViewBinding
 
-abstract class BindingViewHolder<VB : ViewBinding>(val binding: VB) : ViewHolder(binding.root)
+class BindingViewHolder<VB : ViewBinding>(val binding: VB) : ViewHolder(binding.root)

@@ -59,7 +59,7 @@ internal open class DefinitionAdapter : RecyclerView.Adapter<ViewHolder>() {
   override fun getItemId(position: Int): Long {
     val item = dataSource!![position]
     val definition = itemGraph.definitionForName(item.className)
-    val idGetter = (definition as? RealItemDefinition)?.idGetter
+    val idGetter = (definition as? RealItemDefinition<*, *>)?.idGetter
     return idGetter?.invoke(item)?.toLong() ?: super.getItemId(position)
   }
 
