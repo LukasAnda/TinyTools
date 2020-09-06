@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import androidx.viewbinding.ViewBinding
+import androidx.viewpager2.widget.ViewPager2
 import com.tinytools.common.recyclical.datasource.DataSource
 import com.tinytools.common.recyclical.handle.RealRecyclicalHandle
 import com.tinytools.common.recyclical.handle.RecyclicalHandle
@@ -43,100 +44,104 @@ annotation class RecyclicalMarker
 /** @author Aidan Follestad (@afollestad) */
 @RecyclicalMarker
 class RecyclicalSetup internal constructor(
-  val recyclerView: RecyclerView
+        val view: View
 ) {
-  private val itemGraph = ItemGraph()
-  private var emptyView: View? = null
+    private val itemGraph = ItemGraph()
+    private var emptyView: View? = null
 
-  internal var pluginData: MutableMap<String, PluginData>? = null
+    internal var pluginData: MutableMap<String, PluginData>? = null
 
-  internal var globalOnClick: ItemClickListener<Any>? = null
-  internal var globalOnLongClick: ItemClickListener<Any>? = null
-  internal var currentDataSource: DataSource<*>? = null
-  internal var adapterCreator: () -> DefinitionAdapter = { DefinitionAdapter() }
+    internal var globalOnClick: ItemClickListener<Any>? = null
+    internal var globalOnLongClick: ItemClickListener<Any>? = null
+    internal var currentDataSource: DataSource<*>? = null
+    internal var adapterCreator: () -> DefinitionAdapter = { DefinitionAdapter() }
 
-  /**
-   * Sets a layout manaher for the RecyclerView. The default is a vertical LinearLayoutManager,
-   * so this method is optional.
-   */
-  fun withLayoutManager(layoutManager: LayoutManager): RecyclicalSetup {
-    recyclerView.layoutManager = layoutManager
-    return this
-  }
-
-  /**
-   * Sets an empty view that is shown if the data source is empty. Else the view is hidden
-   * (its visibility to gone).
-   */
-  fun withEmptyView(emptyView: View): RecyclicalSetup {
-    this.emptyView = emptyView
-    return this
-  }
-
-  /**
-   * Sets a [DataSource] that provides the content which is displayed in the RecyclerView.
-   * You must use [withItem] to link model definitions to layouts and view holders, of any item
-   * types that are added to the data source.
-   */
-  fun withDataSource(dataSource: DataSource<*>): RecyclicalSetup {
-    this.currentDataSource = dataSource
-    return this
-  }
-
-  /**
-   * Sets a global click listener that is invoked when any type of item is clicked in the list.
-   * Gets called after any item-specific click listeners that may be set.
-   */
-  fun withClickListener(block: ItemClickListener<Any>): RecyclicalSetup {
-    this.globalOnClick = block
-    return this
-  }
-
-  /**
-   * Sets a global long click listener that is invoked when any type of item is long clicked in the
-   * list. Gets called after any item-specific long click listeners that may be set.
-   */
-  fun withLongClickListener(block: ItemClickListener<Any>): RecyclicalSetup {
-    this.globalOnLongClick = block
-    return this
-  }
-
-  /** Persists a [PluginData] instance and allosw it to receive the attach signal. */
-  fun setPluginData(
-    name: String,
-    data: PluginData
-  ) {
-    if (this.pluginData == null) {
-      this.pluginData = mutableMapOf(name to data)
-    } else {
-      this.pluginData!![name] = data
+    /**
+     * Sets a layout manaher for the RecyclerView. The default is a vertical LinearLayoutManager,
+     * so this method is optional.
+     */
+    fun withLayoutManager(layoutManager: LayoutManager): RecyclicalSetup {
+        if (view is RecyclerView) {
+            view.layoutManager = layoutManager
+        }
+        return this
     }
-  }
 
-  /** Retrieves persisted plugin data and auto casts it. */
-  @Suppress("UNCHECKED_CAST") fun <T> getPluginData(name: String): T? {
-    return this.pluginData?.get(name) as? T
-  }
-
-  /** This should not be called directly. */
-  @RestrictTo(LIBRARY) fun registerItemDefinition(
-    layoutBinding: (LayoutInflater, ViewGroup, Boolean) -> ViewBinding,
-    definition: ItemDefinition<*, *>
-  ) = itemGraph.register(layoutBinding, definition)
-
-  internal fun toAttached(): RecyclicalHandle {
-    val dataSource = currentDataSource ?: error("Must set a data source.")
-    return RealRecyclicalHandle(
-        emptyView = emptyView,
-        adapter = adapterCreator(),
-        dataSource = dataSource,
-        itemGraph = itemGraph.validate()
-    ).also {
-      it.getAdapter()
-          .setHasStableIds(itemGraph.hasStableIds())
-      dataSource.attach(it)
+    /**
+     * Sets an empty view that is shown if the data source is empty. Else the view is hidden
+     * (its visibility to gone).
+     */
+    fun withEmptyView(emptyView: View): RecyclicalSetup {
+        this.emptyView = emptyView
+        return this
     }
-  }
+
+    /**
+     * Sets a [DataSource] that provides the content which is displayed in the RecyclerView.
+     * You must use [withItem] to link model definitions to layouts and view holders, of any item
+     * types that are added to the data source.
+     */
+    fun withDataSource(dataSource: DataSource<*>): RecyclicalSetup {
+        this.currentDataSource = dataSource
+        return this
+    }
+
+    /**
+     * Sets a global click listener that is invoked when any type of item is clicked in the list.
+     * Gets called after any item-specific click listeners that may be set.
+     */
+    fun withClickListener(block: ItemClickListener<Any>): RecyclicalSetup {
+        this.globalOnClick = block
+        return this
+    }
+
+    /**
+     * Sets a global long click listener that is invoked when any type of item is long clicked in the
+     * list. Gets called after any item-specific long click listeners that may be set.
+     */
+    fun withLongClickListener(block: ItemClickListener<Any>): RecyclicalSetup {
+        this.globalOnLongClick = block
+        return this
+    }
+
+    /** Persists a [PluginData] instance and allosw it to receive the attach signal. */
+    fun setPluginData(
+            name: String,
+            data: PluginData
+    ) {
+        if (this.pluginData == null) {
+            this.pluginData = mutableMapOf(name to data)
+        } else {
+            this.pluginData!![name] = data
+        }
+    }
+
+    /** Retrieves persisted plugin data and auto casts it. */
+    @Suppress("UNCHECKED_CAST")
+    fun <T> getPluginData(name: String): T? {
+        return this.pluginData?.get(name) as? T
+    }
+
+    /** This should not be called directly. */
+    @RestrictTo(LIBRARY)
+    fun registerItemDefinition(
+            layoutBinding: (LayoutInflater, ViewGroup, Boolean) -> ViewBinding,
+            definition: ItemDefinition<*, *>
+    ) = itemGraph.register(layoutBinding, definition)
+
+    internal fun toAttached(): RecyclicalHandle {
+        val dataSource = currentDataSource ?: error("Must set a data source.")
+        return RealRecyclicalHandle(
+                emptyView = emptyView,
+                adapter = adapterCreator(),
+                dataSource = dataSource,
+                itemGraph = itemGraph.validate()
+        ).also {
+            it.getAdapter()
+                    .setHasStableIds(itemGraph.hasStableIds())
+            dataSource.attach(it)
+        }
+    }
 }
 
 /**
@@ -145,22 +150,40 @@ class RecyclicalSetup internal constructor(
  * @author Aidan Follestad (@afollestad)
  */
 fun RecyclerView.setup(block: RecyclicalSetup.() -> Unit): RecyclicalHandle {
-  val setup = RecyclicalSetup(this).apply(block)
-  if (layoutManager == null) {
-    layoutManager = LinearLayoutManager(context)
-  }
+    val setup = RecyclicalSetup(this).apply(block)
+    if (layoutManager == null) {
+        layoutManager = LinearLayoutManager(context)
+    }
 
-  return setup.toAttached()
-      .also { handle ->
-        adapter = handle.getAdapter()
+    return setup.toAttached()
+            .also { handle ->
+                adapter = handle.getAdapter()
 
-        if (handle is RealRecyclicalHandle) {
-          onAttach { handle.attachDataSource() }
-          onDetach { handle.detachDataSource() }
-        }
+                if (handle is RealRecyclicalHandle) {
+                    onAttach { handle.attachDataSource() }
+                    onDetach { handle.detachDataSource() }
+                }
 
-        setup.pluginData?.values?.forEach { data ->
-          data.attach(this, handle.getDataSource())
-        }
-      }
+                setup.pluginData?.values?.forEach { data ->
+                    data.attach(this, handle.getDataSource())
+                }
+            }
+}
+
+fun ViewPager2.setup(block: RecyclicalSetup.() -> Unit): RecyclicalHandle {
+    val setup = RecyclicalSetup(this).apply(block)
+
+    return setup.toAttached()
+            .also { handle ->
+                adapter = handle.getAdapter()
+
+                if (handle is RealRecyclicalHandle) {
+                    onAttach { handle.attachDataSource() }
+                    onDetach { handle.detachDataSource() }
+                }
+
+//                setup.pluginData?.values?.forEach { data ->
+//                    data.attach(this, handle.getDataSource())
+//                }
+            }
 }

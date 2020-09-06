@@ -20,6 +20,7 @@ import android.view.animation.LayoutAnimationController
 import androidx.annotation.AnimRes
 import androidx.annotation.IntegerRes
 import androidx.annotation.InterpolatorRes
+import androidx.recyclerview.widget.RecyclerView
 import com.tinytools.common.recyclical.RecyclicalSetup
 
 /**
@@ -37,15 +38,15 @@ fun RecyclicalSetup.withLayoutAnimation(
   duration: Long? = null,
   @IntegerRes durationRes: Int? = null
 ) {
-  val resources = recyclerView.context.resources
+  val resources = view.context.resources
   val actualDuration =
     duration ?: durationRes?.let {
       resources.getInteger(durationRes)
           .toLong()
     } ?: 250L
-  val anim = AnimationUtils.loadAnimation(recyclerView.context, animationRes)
+  val anim = AnimationUtils.loadAnimation(view.context, animationRes)
       .apply { this.duration = actualDuration }
-  recyclerView.layoutAnimation = LayoutAnimationController(anim, delay).apply {
-    interpolatorRes?.let { setInterpolator(recyclerView.context, it) }
+    (view as? RecyclerView)?.layoutAnimation = LayoutAnimationController(anim, delay).apply {
+    interpolatorRes?.let { setInterpolator(view.context, it) }
   }
 }
