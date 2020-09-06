@@ -1,5 +1,6 @@
 package com.tinytools.common.fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,10 +11,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.viewbinding.ViewBinding
 import com.markodevcic.peko.PermissionResult
 import com.markodevcic.peko.requestPermissionsAsync
+import com.tinytools.common.views.DrawerView
 import kotlinx.coroutines.launch
 
 abstract class BaseFragment<VIEW_BINDING : ViewBinding> : Fragment() {
     var binding: VIEW_BINDING? = null
+    private lateinit var configHandler: DrawerConfigurationHandler
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = getViewBinding()
@@ -23,6 +26,13 @@ abstract class BaseFragment<VIEW_BINDING : ViewBinding> : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         binding = null
+    }
+
+    override fun onAttach(context: Context) {
+        if(context is DrawerConfigurationHandler){
+            configHandler = context
+        } else error("Activity must extend ThemedActivity")
+        super.onAttach(context)
     }
 
     fun requestPermissions(@StringRes deniedMessage: Int,
@@ -63,6 +73,14 @@ abstract class BaseFragment<VIEW_BINDING : ViewBinding> : Fragment() {
     }
 
     abstract fun getViewBinding(): VIEW_BINDING
+
+    fun setConfiguration(configuration: DrawerView.Configuration){
+        configHandler.onConfigurationChanged(configuration)
+    }
+
+    interface DrawerConfigurationHandler{
+        fun onConfigurationChanged(configuration: DrawerView.Configuration)
+    }
 
 
 }

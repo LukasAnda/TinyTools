@@ -6,6 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.tinytools.common.viewmodel.BaseViewModel
+import com.tinytools.common.views.DrawerView
 import com.tinytools.files.filesystem.HybridFile
 import com.tinytools.files.filesystem.getStorageDirectories
 import com.tinytools.files.model.ui.HybridFileItem
@@ -16,6 +17,8 @@ import java.io.File
 class FilesFragmentViewModel(application: Application) : BaseViewModel(application) {
     private val pageItems = MutableLiveData<Pair<Int, List<HybridFileItem>>>()
     private val directories = mutableMapOf<Int, HybridFile>()
+
+    private val _drawerConfiguration = MutableLiveData<DrawerView.Configuration>()
 
     fun pageCount() = 2
     fun pageItems(): LiveData<Pair<Int, List<HybridFileItem>>> = pageItems
@@ -30,10 +33,21 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
         directories[page] = directory
         viewModelScope.launch(Dispatchers.IO) {
             val file = File(directory.path)
-            Log.d("TAG", "File: ${file.path}, isDirectory: ${file.isDirectory}, canRead: ${file.canRead()}, listFiles: ${file.listFiles()?.joinToString("\n")}}")
             val files = directory.listFiles(context, true).map { it.toVisualItem(context) }
             pageItems.postValue(Pair(page, files))
         }
+    }
+
+    fun configuration(): LiveData<DrawerView.Configuration> = _drawerConfiguration
+
+    fun getDrawerConfiguration() = viewModelScope.launch {
+        val storageItems = getStorageDirectories(context).map { DrawerView.Item(it.name, it.icon, it) }
+
+        val configuration = DrawerView.Configuration(listOf(
+                DrawerView.Category("Storages", storageItems, true)
+        ),null)
+
+        _drawerConfiguration.postValue(configuration)
     }
 
     fun directory(page: Int) = directories[page]

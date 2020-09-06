@@ -41,7 +41,7 @@ fun getStorageDirectories(context: Context): List<StorageDirectory> {
  */
 @TargetApi(Build.VERSION_CODES.N)
 @Synchronized
-fun getStorageDirectoriesNew(context: Context): List<StorageDirectory> {
+private fun getStorageDirectoriesNew(context: Context): List<StorageDirectory> {
     // Final set of paths
     val volumes: MutableList<StorageDirectory> = mutableListOf()
     val sm: StorageManager = context.getSystemService(StorageManager::class.java)
@@ -54,8 +54,7 @@ fun getStorageDirectoriesNew(context: Context): List<StorageDirectory> {
         val name = volume.getDescription(context)
         var icon: Int
         icon = if (!volume.isRemovable) {
-//            R.drawable.ic_phone_android_white_24dp
-            0
+            R.drawable.ic_internal_storage
         } else {
             // HACK: There is no reliable way to distinguish USB and SD external storage
             // However it is often enough to check for "USB" String
@@ -63,8 +62,7 @@ fun getStorageDirectoriesNew(context: Context): List<StorageDirectory> {
 //                R.drawable.ic_usb_white_24dp
                 0
             } else {
-//                R.drawable.ic_sd_storage_white_24dp
-                0
+                R.drawable.ic_sdcard
             }
         }
         volumes.add(StorageDirectory(path.path, name, icon))
@@ -82,7 +80,7 @@ fun getStorageDirectoriesNew(context: Context): List<StorageDirectory> {
  * @return All available SD-Cards in the system (include emulated)
  */
 @Synchronized
-fun getStorageDirectoriesLegacy(context: Context): List<StorageDirectory> {
+private fun getStorageDirectoriesLegacy(context: Context): List<StorageDirectory> {
     val rv: MutableList<String> = ArrayList()
 
     // Primary physical SD-CARD (not emulated)
@@ -149,17 +147,14 @@ fun getStorageDirectoriesLegacy(context: Context): List<StorageDirectory> {
     for (file in rv) {
         val f = File(file)
         @DrawableRes val icon: Int = if ("/storage/emulated/legacy" == file || "/storage/emulated/0" == file || "/mnt/sdcard" == file) {
-//            R.drawable.ic_phone_android_white_24dp
-            0
+            R.drawable.ic_internal_storage
         } else if ("/storage/sdcard1" == file) {
-//            R.drawable.ic_sd_storage_white_24dp
+            R.drawable.ic_sdcard
             0
         } else if ("/" == file) {
-//            R.drawable.ic_drawer_root_white
-            0
+            R.drawable.ic_root
         } else {
-//            R.drawable.ic_sd_storage_white_24dp
-            0
+            R.drawable.ic_sdcard
         }
         val name: String = getDeviceDescriptionLegacy(context, f)
         volumes.add(StorageDirectory(file, name, icon))

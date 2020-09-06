@@ -3,17 +3,20 @@ package com.tinytools.common.activities
 import android.R
 import android.content.Intent
 import android.graphics.Color
+import android.media.VolumeShaper
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
+import com.tinytools.common.fragments.BaseFragment
 import com.tinytools.common.fragments.BasicSettingsFragment
 import com.tinytools.common.fragments.BasicSettingsFragment.ColorType.Primary
 import com.tinytools.common.fragments.BasicSettingsFragment.ColorType.Secondary
+import com.tinytools.common.views.DrawerView
 import xyz.aprildown.theme.Theme
 import kotlin.random.Random
 
 
-abstract class ThemedActivity<BINDING : ViewBinding> : AppCompatActivity(), BasicSettingsFragment.SettingsHandler {
+abstract class ThemedActivity<BINDING : ViewBinding> : AppCompatActivity(), BasicSettingsFragment.SettingsHandler, BaseFragment.DrawerConfigurationHandler {
 
     val binding by lazy {
         getViewBinding()
@@ -33,10 +36,10 @@ abstract class ThemedActivity<BINDING : ViewBinding> : AppCompatActivity(), Basi
             colorPrimary = randomColor
             colorPrimaryVariant = darker(colorPrimary)
             colorStatusBar = colorPrimaryVariant
-            colorOnPrimary = on(colorPrimary)
+            colorOnPrimary = Color.BLACK
             colorSecondary = randomColor
             colorSecondaryVariant = darker(colorSecondary)
-            colorOnSecondary = on(colorSecondary)
+            colorOnSecondary = Color.BLACK
             lightStatusByPrimary = true
             colorNavigationBar = if (Random.nextBoolean()) colorPrimary else null
         }
@@ -71,6 +74,12 @@ abstract class ThemedActivity<BINDING : ViewBinding> : AppCompatActivity(), Basi
             }
         }
     }
+
+    override fun onConfigurationChanged(configuration: DrawerView.Configuration) {
+        onDrawerConfigurationChanged(configuration)
+    }
+
+    open fun onDrawerConfigurationChanged(configuration: DrawerView.Configuration){}
 
     private val randomColor: Int
         get() = Color.rgb(Random.nextInt(), Random.nextInt(), Random.nextInt())

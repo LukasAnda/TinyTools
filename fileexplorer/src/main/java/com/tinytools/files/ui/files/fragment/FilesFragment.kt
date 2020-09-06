@@ -50,9 +50,6 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(){
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-
-
-
         requestPermissions(0,0,0, listOf(android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)){
             adapter?.swapData(createPageConfigs(viewModel.pageCount()))
 
@@ -66,6 +63,12 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(){
                     delay(200)
                 }
             }
+
+            viewModel.getDrawerConfiguration()
+
+            viewModel.configuration().observe(viewLifecycleOwner, {
+                setConfiguration(it)
+            })
         }
     }
 
