@@ -63,13 +63,6 @@ class DrawerView @JvmOverloads constructor(context: Context, attrs: AttributeSet
                 }
 
                 onClick { index ->
-//                    item.items.forEachIndexed { listIndex, listItem ->
-//                        if (item.expanded) {
-//                            dataSource.remove(listItem)
-//                        } else {
-//                            dataSource.insert(index + listIndex + 1, listItem)
-//                        }
-//                    }
                     item.expanded = !item.expanded
 
                     dataSource.invalidateAt(index)
@@ -79,7 +72,7 @@ class DrawerView @JvmOverloads constructor(context: Context, attrs: AttributeSet
     }
 
     fun reloadConfiguration(configuration: Configuration){
-        dataSource.addAll(configuration.items)
+        dataSource.set(configuration.items)
         listener = configuration.handler
     }
 

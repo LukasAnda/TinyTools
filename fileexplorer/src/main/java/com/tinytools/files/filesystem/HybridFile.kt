@@ -41,6 +41,4 @@ open class HybridFile(open var path: String) {
     open fun setLastModified(lastModified: Long): Boolean = false
     open fun mkdirs(context: Context): Boolean = false
     open fun delete(context: Context): Boolean = false
-
-    suspend fun toVisualItem(context: Context) = HybridFileItem(name(context), Icon(), readableSize(context), this, "")
 }
