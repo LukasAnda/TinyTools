@@ -8,10 +8,13 @@ import com.tinytools.common.activities.ThemedActivity
 import com.tinytools.common.views.DrawerView
 import com.tinytools.files.R
 import com.tinytools.files.databinding.MainActivityBinding
+import com.tinytools.files.model.ui.StorageDirectory
 import com.tinytools.files.ui.files.fragment.FilesFragment
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ThemedActivity<MainActivityBinding>(), DrawerView.DrawerHandler {
     private lateinit var toggle: ActionBarDrawerToggle
+    private val viewModel by viewModel<MainActivityViewModel>()
 
     override fun getViewBinding() = MainActivityBinding.inflate(layoutInflater)
 
@@ -34,7 +37,10 @@ class MainActivity : ThemedActivity<MainActivityBinding>(), DrawerView.DrawerHan
     }
 
     override fun onItemSelected(item: DrawerView.Item) {
-        swapColors()
+        when (val payload = item.item) {
+            is StorageDirectory -> viewModel.changeDirectory(payload)
+        }
+//        swapColors()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

@@ -11,6 +11,7 @@ import com.tinytools.files.filesystem.getStorageDirectories
 import com.tinytools.files.model.ui.HybridFileItem
 import com.tinytools.files.model.ui.Icon
 import com.tinytools.files.model.ui.PageStyle
+import com.tinytools.files.model.ui.StorageDirectory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -23,8 +24,9 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
 
     fun pageItems(): LiveData<List<HybridFileItem>> = pageItems
 
-    //TODO consider preferences
-    fun savedDirectories() = getStorageDirectories(context).first().let { HybridFile(it.path).getTypedFile(context) }
+    fun listFiles(directory: StorageDirectory) {
+        listFiles(HybridFile(directory.path).getTypedFile(context))
+    }
 
     fun listFiles(directory: HybridFile) {
         currentDirectory = directory

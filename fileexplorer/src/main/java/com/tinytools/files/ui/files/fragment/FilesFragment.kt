@@ -3,7 +3,6 @@ package com.tinytools.files.ui.files.fragment
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.tinytools.common.fragments.BaseFragment
 import com.tinytools.common.recyclical.datasource.dataSourceOf
@@ -15,13 +14,15 @@ import com.tinytools.files.databinding.FilesItemGridBinding
 import com.tinytools.files.databinding.FilesItemLinearBinding
 import com.tinytools.files.model.ui.HybridFileItem
 import com.tinytools.files.model.ui.PageStyle
+import com.tinytools.files.ui.MainActivityViewModel
 import com.tinytools.files.ui.files.viewmodel.FilesFragmentViewModel
-import kotlinx.coroutines.launch
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class FilesFragment : BaseFragment<FilesFragmentBinding>() {
     override fun getViewBinding() = FilesFragmentBinding.inflate(layoutInflater)
     private val viewModel by viewModel<FilesFragmentViewModel>()
+    private val activityViewModel by sharedViewModel<MainActivityViewModel>()
 
     private var directoryItems = dataSourceOf()
 
@@ -64,11 +65,9 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>() {
                 }
             })
 
-            lifecycleScope.launch {
-                viewModel.savedDirectories().let {
-                    viewModel.listFiles(it)
-                }
-            }
+            activityViewModel.currentDirectory().observe(viewLifecycleOwner, {
+                viewModel.listFiles(it)
+            })
 
             viewModel.getDrawerConfiguration()
 
