@@ -12,54 +12,18 @@ import com.tinytools.files.model.ui.StorageDirectory
 import com.tinytools.files.ui.files.fragment.FilesFragment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : ThemedActivity<MainActivityBinding>(), DrawerView.DrawerHandler {
-    private lateinit var toggle: ActionBarDrawerToggle
+class MainActivity : ThemedActivity<MainActivityBinding>() {
     private val viewModel by viewModel<MainActivityViewModel>()
 
     override fun getViewBinding() = MainActivityBinding.inflate(layoutInflater)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setSupportActionBar(binding.toolbar)
-        toggle = ActionBarDrawerToggle(this, binding.root, R.string.nav_app_bar_open_drawer_description, R.string.nav_app_bar_navigate_up_description)
-        binding.root.addDrawerListener(toggle)
-        toggle.syncState()
-        supportActionBar?.run {
-            setDisplayHomeAsUpEnabled(true)
-            setHomeButtonEnabled(true)
-        }
     }
 
     override fun onResume() {
         super.onResume()
         supportFragmentManager.beginTransaction().replace(binding.container.id, FilesFragment()).commit()
 
-    }
-
-    override fun onItemSelected(item: DrawerView.Item) {
-        when (val payload = item.item) {
-            is StorageDirectory -> viewModel.changeDirectory(payload)
-        }
-//        swapColors()
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle presses on the action bar items
-        if (toggle.onOptionsItemSelected(item)) {
-            return true
-        }
-        return false
-    }
-
-    override fun onDrawerConfigurationChanged(configuration: DrawerView.Configuration) {
-        binding.drawer.reloadConfiguration(configuration.apply { handler = this@MainActivity })
-    }
-
-    override fun onBackPressed() {
-        if (binding.root.isDrawerOpen(GravityCompat.START)) {
-            binding.root.closeDrawer(GravityCompat.START)
-        } else {
-            super.onBackPressed()
-        }
     }
 }

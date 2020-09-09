@@ -22,6 +22,23 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
 
     private val _drawerConfiguration = MutableLiveData<DrawerView.Configuration>()
 
+    private val _currentDirectory: MutableLiveData<StorageDirectory> = MutableLiveData<StorageDirectory>()
+
+    init {
+        loadLastOpenedDirectory()
+    }
+
+    fun currentDirectory(): LiveData<StorageDirectory> = _currentDirectory
+
+    private fun loadLastOpenedDirectory() {
+        // TODO Consider loading from database
+        _currentDirectory.postValue(getStorageDirectories(context).first())
+    }
+
+    fun changeDirectory(directory: StorageDirectory){
+        _currentDirectory.postValue(directory)
+    }
+
     fun pageItems(): LiveData<List<HybridFileItem>> = pageItems
 
     fun listFiles(directory: StorageDirectory) {

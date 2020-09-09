@@ -16,7 +16,7 @@ import xyz.aprildown.theme.Theme
 import kotlin.random.Random
 
 
-abstract class ThemedActivity<BINDING : ViewBinding> : AppCompatActivity(), BasicSettingsFragment.SettingsHandler, BaseFragment.DrawerConfigurationHandler {
+abstract class ThemedActivity<BINDING : ViewBinding> : AppCompatActivity(), BasicSettingsFragment.SettingsHandler {
 
     val binding by lazy {
         getViewBinding()
@@ -73,10 +73,6 @@ abstract class ThemedActivity<BINDING : ViewBinding> : AppCompatActivity(), Basi
                 }
             }
         }
-    }
-
-    override fun onConfigurationChanged(configuration: DrawerView.Configuration) {
-        onDrawerConfigurationChanged(configuration)
     }
 
     open fun onDrawerConfigurationChanged(configuration: DrawerView.Configuration){}

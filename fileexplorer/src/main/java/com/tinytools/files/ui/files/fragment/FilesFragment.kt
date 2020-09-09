@@ -1,25 +1,32 @@
 package com.tinytools.files.ui.files.fragment
 
 import android.os.Bundle
+import android.view.MenuItem
 import android.view.View
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import com.tinytools.common.fragments.BaseFragment
 import com.tinytools.common.recyclical.datasource.dataSourceOf
 import com.tinytools.common.recyclical.handle.RecyclicalHandle
 import com.tinytools.common.recyclical.setup
 import com.tinytools.common.recyclical.withItem
+import com.tinytools.common.views.DrawerView
+import com.tinytools.files.R
 import com.tinytools.files.databinding.FilesFragmentBinding
 import com.tinytools.files.databinding.FilesItemGridBinding
 import com.tinytools.files.databinding.FilesItemLinearBinding
 import com.tinytools.files.model.ui.HybridFileItem
 import com.tinytools.files.model.ui.PageStyle
+import com.tinytools.files.model.ui.StorageDirectory
 import com.tinytools.files.ui.MainActivityViewModel
 import com.tinytools.files.ui.files.viewmodel.FilesFragmentViewModel
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class FilesFragment : BaseFragment<FilesFragmentBinding>() {
+class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHandler {
     override fun getViewBinding() = FilesFragmentBinding.inflate(layoutInflater)
     private val viewModel by viewModel<FilesFragmentViewModel>()
     private val activityViewModel by sharedViewModel<MainActivityViewModel>()
@@ -28,10 +35,27 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>() {
 
     private var recyclicalHandle: RecyclicalHandle? = null
     private var manager: GridLayoutManager? = null
+    private var toggle: ActionBarDrawerToggle? = null
 
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        (activity as? AppCompatActivity)?.run {
+            setSupportActionBar(binding?.toolbar)
+            toggle = ActionBarDrawerToggle(this, binding?.root, R.string.nav_app_bar_open_drawer_description, R.string.nav_app_bar_navigate_up_description)
+            binding?.root?.addDrawerListener(toggle!!)
+            toggle?.syncState()
+            supportActionBar?.run {
+//                setDisplayHomeAsUpEnabled(true)
+//                setHomeButtonEnabled(true)
+
+                setDisplayHomeAsUpEnabled(true)
+                setDisplayShowHomeEnabled(true)
+            }
+        }
+        this.setHasOptionsMenu(true)
+
 
         manager = GridLayoutManager(context, 1)
 
@@ -39,6 +63,7 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>() {
 
         activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                if (closeDrawerIfPossible()) return
                 viewModel.navigateUp()
             }
         })
@@ -65,33 +90,41 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>() {
                 }
             })
 
-            activityViewModel.currentDirectory().observe(viewLifecycleOwner, {
+            viewModel.currentDirectory().observe(viewLifecycleOwner, {
                 viewModel.listFiles(it)
             })
 
             viewModel.getDrawerConfiguration()
 
             viewModel.configuration().observe(viewLifecycleOwner, {
-                setConfiguration(it)
+                binding?.drawer?.reloadConfiguration(it.apply { handler = this@FilesFragment })
             })
         }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (toggle?.onOptionsItemSelected(item) == true) {
+            return true
+        }
+        return false
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         recyclicalHandle = null
         manager = null
+        toggle = null
     }
 
     private fun areTheSame(left: Any, right: Any): Boolean {
-        return when(left){
+        return when (left) {
             is HybridFileItem -> left.areTheSame(right)
             else -> false
         }
     }
 
     private fun areContentsTheSame(left: Any, right: Any): Boolean {
-        return when(left){
+        return when (left) {
             is HybridFileItem -> left.areContentsTheSame(right)
             else -> false
         }
@@ -126,5 +159,20 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>() {
                 }
             }
         }
+    }
+
+    override fun onItemSelected(item: DrawerView.Item) {
+        when (val payload = item.item) {
+            is StorageDirectory -> viewModel.changeDirectory(payload)
+        }
+        closeDrawerIfPossible()
+    }
+
+    private fun closeDrawerIfPossible(): Boolean {
+        if (binding?.root?.isDrawerOpen(GravityCompat.START) == true) {
+            binding?.root?.closeDrawer(GravityCompat.START)
+            return true
+        }
+        return false
     }
 }

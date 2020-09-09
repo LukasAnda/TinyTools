@@ -16,7 +16,6 @@ import kotlinx.coroutines.launch
 
 abstract class BaseFragment<VIEW_BINDING : ViewBinding> : Fragment() {
     var binding: VIEW_BINDING? = null
-    private lateinit var configHandler: DrawerConfigurationHandler
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         binding = getViewBinding()
@@ -26,13 +25,6 @@ abstract class BaseFragment<VIEW_BINDING : ViewBinding> : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         binding = null
-    }
-
-    override fun onAttach(context: Context) {
-        if(context is DrawerConfigurationHandler){
-            configHandler = context
-        } else error("Activity must extend ThemedActivity")
-        super.onAttach(context)
     }
 
     fun requestPermissions(@StringRes deniedMessage: Int,
@@ -73,14 +65,5 @@ abstract class BaseFragment<VIEW_BINDING : ViewBinding> : Fragment() {
     }
 
     abstract fun getViewBinding(): VIEW_BINDING
-
-    fun setConfiguration(configuration: DrawerView.Configuration){
-        configHandler.onConfigurationChanged(configuration)
-    }
-
-    interface DrawerConfigurationHandler{
-        fun onConfigurationChanged(configuration: DrawerView.Configuration)
-    }
-
 
 }
