@@ -42,12 +42,11 @@ open class HybridFile(open var path: String) {
     open fun mkdirs(context: Context): Boolean = false
     open fun delete(context: Context): Boolean = false
 
-    fun getIcon(context: Context, showPreview: Boolean = false): Icon {
-        // Todo add preview showing
-        if(isDirectory(context)){
-            return Icon(R.drawable.ic_folder)
+    fun getIcon(context: Context): Icon {
+        return if(isDirectory(context)){
+            Icon(R.drawable.ic_folder)
         } else {
-            return Icon(R.drawable.ic_file)
+            Icon(R.drawable.ic_file, path)
         }
     }
 }

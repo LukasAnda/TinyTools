@@ -7,10 +7,14 @@ import android.os.Build.VERSION
 import android.os.Environment
 import android.os.storage.StorageManager
 import android.os.storage.StorageVolume
+import android.provider.MediaStore
 import android.text.TextUtils
 import androidx.annotation.DrawableRes
 import com.tinytools.files.R
+import com.tinytools.files.model.ui.LibraryDirectory
 import com.tinytools.files.model.ui.StorageDirectory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.*
 
@@ -184,4 +188,93 @@ private fun getDeviceDescriptionLegacy(context: Context, file: File): String {
     }
 }
 
-fun getLibraryDirectories() = LibraryFile.values().toList()
+fun getLibraryDirectories(context: Context) = LibraryFile.values().toList().map { LibraryDirectory(context.getString(it.getName()), it.getIcon(), it) }
+
+suspend fun listRecents() = withContext(Dispatchers.IO) {
+
+}
+
+suspend fun listImages(context: Context): List<HybridFile> = withContext(Dispatchers.IO) {
+    val files = mutableListOf<HybridFile>()
+    val projection = arrayOf(MediaStore.Images.Media.DATA)
+    val cursor = context
+            .contentResolver
+            .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null, null)
+    if (cursor == null) {
+        return@withContext files
+    } else if (cursor.count > 0 && cursor.moveToFirst()) {
+        do {
+            val path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA))
+            val file = HybridFile(path).getTypedFile(context)
+            files.add(file)
+        } while (cursor.moveToNext())
+    }
+    cursor.close()
+    return@withContext files
+}
+
+suspend fun listAudio(context: Context): List<HybridFile> = withContext(Dispatchers.IO) {
+    val files = mutableListOf<HybridFile>()
+    val projection = arrayOf(MediaStore.Audio.Media.DATA)
+    val cursor = context
+            .contentResolver
+            .query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, null, null, null)
+    if (cursor == null) {
+        return@withContext files
+    } else if (cursor.count > 0 && cursor.moveToFirst()) {
+        do {
+            val path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA))
+            val file = HybridFile(path).getTypedFile(context)
+            files.add(file)
+        } while (cursor.moveToNext())
+    }
+    cursor.close()
+    return@withContext files
+}
+
+suspend fun listVideo(context: Context): List<HybridFile> = withContext(Dispatchers.IO) {
+    val files = mutableListOf<HybridFile>()
+    val projection = arrayOf(MediaStore.Video.Media.DATA)
+    val cursor = context
+            .contentResolver
+            .query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null)
+    if (cursor == null) {
+        return@withContext files
+    } else if (cursor.count > 0 && cursor.moveToFirst()) {
+        do {
+            val path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA))
+            val file = HybridFile(path).getTypedFile(context)
+            files.add(file)
+        } while (cursor.moveToNext())
+    }
+    cursor.close()
+    return@withContext files
+}
+
+suspend fun listDocs(context: Context): List<HybridFile> = withContext(Dispatchers.IO) {
+    return@withContext emptyList()
+}
+
+suspend fun listApks(context: Context): List<HybridFile> = withContext(Dispatchers.IO) {
+    val files = mutableListOf<HybridFile>()
+    val projection = arrayOf(MediaStore.Files.FileColumns.DATA)
+
+    val cursor = context
+            .contentResolver
+            .query(MediaStore.Files.getContentUri("external"), projection, null, null, null)
+    if (cursor == null) {
+        return@withContext files
+    } else if (cursor.count > 0 && cursor.moveToFirst()) {
+        do {
+            val path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA))
+            if (path != null && path.endsWith(".apk")) {
+                val file = HybridFile(path).getTypedFile(context)
+                files.add(file)
+            }
+        } while (cursor.moveToNext())
+    }
+    cursor.close()
+    return@withContext files
+}
+
+suspend fun listArchives() {}

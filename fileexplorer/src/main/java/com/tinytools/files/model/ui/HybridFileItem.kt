@@ -25,4 +25,4 @@ sealed class HybridFileItem(val name: String, val icon: Icon, val size: String, 
 
 }
 
-data class Icon(@DrawableRes val resource: Int = 0, val bitmap: Bitmap? = null)
+data class Icon(@DrawableRes val resource: Int = 0, val path: String = "")

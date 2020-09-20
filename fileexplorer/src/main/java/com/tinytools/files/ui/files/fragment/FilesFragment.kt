@@ -8,6 +8,9 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.GridLayoutManager
+import coil.load
+import coil.transform.CircleCropTransformation
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.tinytools.common.fragments.BaseFragment
 import com.tinytools.common.recyclical.datasource.dataSourceOf
 import com.tinytools.common.recyclical.handle.RecyclicalHandle
@@ -18,13 +21,14 @@ import com.tinytools.files.R
 import com.tinytools.files.databinding.FilesFragmentBinding
 import com.tinytools.files.databinding.FilesItemGridBinding
 import com.tinytools.files.databinding.FilesItemLinearBinding
+import com.tinytools.files.model.ui.Directory
 import com.tinytools.files.model.ui.HybridFileItem
 import com.tinytools.files.model.ui.PageStyle
-import com.tinytools.files.model.ui.StorageDirectory
 import com.tinytools.files.ui.MainActivityViewModel
 import com.tinytools.files.ui.files.viewmodel.FilesFragmentViewModel
 import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.io.File
 
 class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHandler {
     override fun getViewBinding() = FilesFragmentBinding.inflate(layoutInflater)
@@ -139,9 +143,9 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
                 onBind { binding, index, item ->
                     binding.text.text = item.name
                     binding.size.text = item.size
-                    when {
-                        item.icon.bitmap != null -> binding.icon.setImageBitmap(item.icon.bitmap)
-                        item.icon.resource != 0 -> binding.icon.setImageResource(item.icon.resource)
+                    binding.icon.load(File(item.icon.path)) {
+                        error(item.icon.resource)
+                        transformations(CircleCropTransformation())
                     }
                 }
 
@@ -153,9 +157,8 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
             withItem<HybridFileItem.HybridFileGridItem, FilesItemGridBinding>(FilesItemGridBinding::inflate) {
                 onBind { binding, index, item ->
                     binding.text.text = item.name
-                    when {
-                        item.icon.bitmap != null -> binding.icon.setImageBitmap(item.icon.bitmap)
-                        item.icon.resource != 0 -> binding.icon.setImageResource(item.icon.resource)
+                    binding.icon.load(File(item.icon.path)) {
+                        error(item.icon.resource)
                     }
                 }
 
@@ -168,7 +171,7 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
 
     override fun onItemSelected(item: DrawerView.Item) {
         when (val payload = item.item) {
-            is StorageDirectory -> viewModel.changeDirectory(payload)
+            is Directory -> viewModel.changeDirectory(payload)
         }
         closeDrawerIfPossible()
     }

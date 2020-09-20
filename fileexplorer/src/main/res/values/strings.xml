@@ -12,6 +12,8 @@
     <string name="library_documents">Documents</string>
     <string name="library_apps">Apps</string>
     <string name="library_archives">Archives</string>
+    <string name="storage">Storage</string>
+    <string name="library">Library</string>
 
     <plurals name="folder_size">
         <item quantity="one">%d item</item>

@@ -1,10 +1,26 @@
 package com.tinytools.files
 
+import coil.Coil
+import coil.ImageLoader
+import coil.fetch.VideoFrameFileFetcher
+import coil.fetch.VideoFrameUriFetcher
 import com.tinytools.common.TinyApplication
 import com.tinytools.files.di.viewModelsModule
 import org.koin.core.module.Module
 
-class FilesApplication : TinyApplication(){
+class FilesApplication : TinyApplication() {
     override val modules: List<Module>
         get() = mutableListOf(viewModelsModule)
+
+    override fun onCreate() {
+        super.onCreate()
+
+        val imageLoader = ImageLoader.Builder(this)
+                .componentRegistry {
+                    add(VideoFrameFileFetcher(this@FilesApplication))
+                    add(VideoFrameUriFetcher(this@FilesApplication))
+                }
+                .build()
+        Coil.setImageLoader(imageLoader)
+    }
 }

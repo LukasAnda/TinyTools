@@ -9,10 +9,18 @@ import com.tinytools.common.viewmodel.BaseViewModel
 import com.tinytools.common.views.DrawerView
 import com.tinytools.files.R
 import com.tinytools.files.filesystem.HybridFile
+import com.tinytools.files.filesystem.LibraryFile
+import com.tinytools.files.filesystem.LibraryFile.*
 import com.tinytools.files.filesystem.getLibraryDirectories
 import com.tinytools.files.filesystem.getStorageDirectories
+import com.tinytools.files.filesystem.listApks
+import com.tinytools.files.filesystem.listAudio
+import com.tinytools.files.filesystem.listImages
+import com.tinytools.files.filesystem.listVideo
+import com.tinytools.files.model.ui.Directory
 import com.tinytools.files.model.ui.HybridFileItem
 import com.tinytools.files.model.ui.Icon
+import com.tinytools.files.model.ui.LibraryDirectory
 import com.tinytools.files.model.ui.PageStyle
 import com.tinytools.files.model.ui.StorageDirectory
 import kotlinx.coroutines.Dispatchers
@@ -25,27 +33,31 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
 
     private val _drawerConfiguration = MutableLiveData<DrawerView.Configuration>()
 
-    private val _currentDirectory: MutableLiveData<StorageDirectory> = MutableLiveData<StorageDirectory>()
+    private val _currentDirectory: MutableLiveData<Directory> = MutableLiveData<Directory>()
 
     init {
         loadLastOpenedDirectory()
     }
 
-    fun currentDirectory(): LiveData<StorageDirectory> = _currentDirectory
+    fun currentDirectory(): LiveData<Directory> = _currentDirectory
 
     private fun loadLastOpenedDirectory() {
         // TODO Consider loading from database
         _currentDirectory.postValue(getStorageDirectories(context).first())
     }
 
-    fun changeDirectory(directory: StorageDirectory){
+    fun changeDirectory(directory: Directory){
         _currentDirectory.postValue(directory)
     }
 
+
     fun pageItems(): LiveData<List<HybridFileItem>> = pageItems
 
-    fun listFiles(directory: StorageDirectory) {
-        listFiles(HybridFile(directory.path).getTypedFile(context))
+    fun listFiles(directory: Directory) {
+        when(directory){
+            is StorageDirectory -> listFiles(HybridFile(directory.path).getTypedFile(context))
+            is LibraryDirectory -> listFiles(directory.type)
+        }
     }
 
     fun listFiles(directory: HybridFile) {
@@ -54,6 +66,24 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
             // Todo load preferred directory style grid/linear
             currentPageStyle.postValue(PageStyle.List)
             val files = directory.listFiles(context, true).map { HybridFileItem.HybridFileLinearItem(it.name(context), it.getIcon(context), it.readableSize(context), it.getTypedFile(context), "") }
+            pageItems.postValue(files)
+        }
+    }
+
+    private fun listFiles(directory: LibraryFile){
+        currentDirectory = null
+        viewModelScope.launch(Dispatchers.IO){
+            val filesToProcess = when(directory){
+                Recents -> emptyList()
+                Images -> listImages(context)
+                Video -> listVideo(context)
+                Audio -> listAudio(context)
+                Documents -> emptyList()
+                Apps -> listApks(context)
+                Archives -> emptyList()
+            }
+            currentPageStyle.postValue(PageStyle.List)
+            val files = filesToProcess.map { HybridFileItem.HybridFileLinearItem(it.name(context), it.getIcon(context), it.readableSize(context), it.getTypedFile(context), "") }
             pageItems.postValue(files)
         }
     }
@@ -84,10 +114,10 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
 
     fun getDrawerConfiguration() = viewModelScope.launch {
         val storageItems = getStorageDirectories(context).map { DrawerView.Item(it.name, it.icon, it) }
-        val libraryItems = getLibraryDirectories().map { DrawerView.Item(context.getString(it.getName()), it.getIcon(), it) }
+        val libraryItems = getLibraryDirectories(context).map { DrawerView.Item(it.name, it.icon, it) }
         val configuration = DrawerView.Configuration(listOf(
-                DrawerView.Category("Storages", storageItems, true),
-                DrawerView.Category("Library", libraryItems, true)
+                DrawerView.Category(context.getString(R.string.storage), storageItems, true),
+                DrawerView.Category(context.getString(R.string.library), libraryItems, true)
         ), null)
 
         _drawerConfiguration.postValue(configuration)
