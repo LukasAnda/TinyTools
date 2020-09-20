@@ -6,6 +6,7 @@ import coil.fetch.VideoFrameFileFetcher
 import coil.fetch.VideoFrameUriFetcher
 import com.tinytools.common.TinyApplication
 import com.tinytools.files.di.viewModelsModule
+import com.tinytools.files.helpers.ApkIconFetcher
 import org.koin.core.module.Module
 
 class FilesApplication : TinyApplication() {
@@ -19,6 +20,7 @@ class FilesApplication : TinyApplication() {
                 .componentRegistry {
                     add(VideoFrameFileFetcher(this@FilesApplication))
                     add(VideoFrameUriFetcher(this@FilesApplication))
+                    add(ApkIconFetcher(this@FilesApplication))
                 }
                 .build()
         Coil.setImageLoader(imageLoader)

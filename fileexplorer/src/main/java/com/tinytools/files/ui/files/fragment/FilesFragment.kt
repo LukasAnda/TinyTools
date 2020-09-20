@@ -145,7 +145,7 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
                     binding.size.text = item.size
                     binding.icon.load(File(item.icon.path)) {
                         error(item.icon.resource)
-                        transformations(CircleCropTransformation())
+//                        transformations(CircleCropTransformation())
                     }
                 }
 
