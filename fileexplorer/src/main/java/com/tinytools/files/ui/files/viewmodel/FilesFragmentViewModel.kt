@@ -9,6 +9,7 @@ import com.tinytools.common.viewmodel.BaseViewModel
 import com.tinytools.common.views.DrawerView
 import com.tinytools.files.R
 import com.tinytools.files.filesystem.HybridFile
+import com.tinytools.files.filesystem.getLibraryDirectories
 import com.tinytools.files.filesystem.getStorageDirectories
 import com.tinytools.files.model.ui.HybridFileItem
 import com.tinytools.files.model.ui.Icon
@@ -83,9 +84,10 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
 
     fun getDrawerConfiguration() = viewModelScope.launch {
         val storageItems = getStorageDirectories(context).map { DrawerView.Item(it.name, it.icon, it) }
-
+        val libraryItems = getLibraryDirectories().map { DrawerView.Item(context.getString(it.getName()), it.getIcon(), it) }
         val configuration = DrawerView.Configuration(listOf(
-                DrawerView.Category("Storages", storageItems, true)
+                DrawerView.Category("Storages", storageItems, true),
+                DrawerView.Category("Library", libraryItems, true)
         ), null)
 
         _drawerConfiguration.postValue(configuration)

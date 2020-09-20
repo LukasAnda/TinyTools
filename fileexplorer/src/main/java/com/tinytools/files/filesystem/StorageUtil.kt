@@ -183,3 +183,5 @@ private fun getDeviceDescriptionLegacy(context: Context, file: File): String {
         else -> file.name
     }
 }
+
+fun getLibraryDirectories() = LibraryFile.values().toList()

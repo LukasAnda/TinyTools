@@ -5,6 +5,13 @@
     <string name="root_directory">Root</string>
     <string name="open_drawer">Open drawer</string>
     <string name="close_drawer">Close drawer</string>
+    <string name="library_recents">Recents</string>
+    <string name="library_images"><![CDATA[Images & Photos]]></string>
+    <string name="library_video">Video</string>
+    <string name="library_audio">Audio</string>
+    <string name="library_documents">Documents</string>
+    <string name="library_apps">Apps</string>
+    <string name="library_archives">Archives</string>
 
     <plurals name="folder_size">
         <item quantity="one">%d item</item>

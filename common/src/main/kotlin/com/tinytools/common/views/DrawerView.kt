@@ -1,5 +1,7 @@
 package com.tinytools.common.views
 
+
+import android.content.ClipData
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -10,7 +12,6 @@ import com.tinytools.common.R
 import com.tinytools.common.databinding.DrawerCategoryItemBinding
 import com.tinytools.common.databinding.DrawerItemBinding
 import com.tinytools.common.databinding.DrawerViewBinding
-import com.tinytools.common.recyclical.datasource.dataSourceOf
 import com.tinytools.common.recyclical.datasource.dataSourceTypedOf
 import com.tinytools.common.recyclical.setup
 import com.tinytools.common.recyclical.withItem
@@ -28,11 +29,12 @@ class DrawerView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         viewBinding.recycler.setup {
             withDataSource(dataSource)
             withLayoutManager(LinearLayoutManager(context))
+
             withItem<Item, DrawerItemBinding>(DrawerItemBinding::inflate) {
                 onBind { binding, index, item ->
                     binding.name.text = item.name
 
-                    if(item.icon != 0){
+                    if (item.icon != 0) {
                         binding.icon.setImageResource(item.icon)
                     }
                 }
@@ -45,17 +47,8 @@ class DrawerView @JvmOverloads constructor(context: Context, attrs: AttributeSet
             withItem<Category, DrawerCategoryItemBinding>(DrawerCategoryItemBinding::inflate) {
                 onBind { binding, index, item ->
                     binding.name.text = item.name
-                    postDelayed({
-                        item.items.forEachIndexed { listIndex, listItem ->
-                            if (!item.expanded) {
-                                dataSource.remove(listItem)
-                            } else {
-                                dataSource.insert(index + listIndex + 1, listItem)
-                            }
-                        }
-                    },100)
 
-                    if(item.expanded){
+                    if (item.expanded) {
                         binding.arrow.setImageResource(R.drawable.ic_down)
                     } else {
                         binding.arrow.setImageResource(R.drawable.ic_up)
@@ -65,14 +58,29 @@ class DrawerView @JvmOverloads constructor(context: Context, attrs: AttributeSet
                 onClick { index ->
                     item.expanded = !item.expanded
 
+                    item.items.forEachIndexed { listIndex, listItem ->
+                            if (!item.expanded) {
+                                dataSource.remove(listItem)
+                            } else {
+                                dataSource.insert(index + listIndex + 1, listItem)
+                            }
+                        }
+
                     dataSource.invalidateAt(index)
                 }
             }
         }
     }
 
-    fun reloadConfiguration(configuration: Configuration){
-        dataSource.set(configuration.items)
+    fun reloadConfiguration(configuration: Configuration) {
+        val items = configuration.items.flatMap {
+            when(it){
+                is ClipData.Item -> listOf(it)
+                is Category ->  listOf(it) + it.items
+                else -> error("")
+            }
+        }
+        dataSource.set(items)
         listener = configuration.handler
     }
 
@@ -82,8 +90,8 @@ class DrawerView @JvmOverloads constructor(context: Context, attrs: AttributeSet
 
     data class Configuration(val items: List<DrawerItem>, var handler: DrawerHandler?)
 
-    data class Item(val name: String, @DrawableRes val icon: Int, val item: Any): DrawerItem
-    data class Category(val name: String, val items: List<Item>, var expanded: Boolean): DrawerItem
+    data class Item(val name: String, @DrawableRes val icon: Int, val item: Any) : DrawerItem
+    data class Category(val name: String, val items: List<Item>, var expanded: Boolean) : DrawerItem
 
     interface DrawerItem
 }
