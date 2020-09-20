@@ -51,7 +51,7 @@ class RealItemDefinition<IT : Any, VB : ViewBinding>(
     internal var itemOnLongClick: ItemClickListener<Any>? = null
 
     //  internal var creator: ((layoutBinding: VB) -> VH)? = null
-    internal var binder:ViewBinder<*, *>? = null
+    internal var binder: ViewBinder<*, *>? = null
     internal var idGetter: IdGetter<Any>? = null
     internal var onRecycled: RecycledCallback<Any>? = null
 
@@ -83,8 +83,8 @@ class RealItemDefinition<IT : Any, VB : ViewBinding>(
 
     internal val viewClickListener = View.OnClickListener { itemView ->
         if (Debouncer.canPerform(itemView)) {
-            val position = itemView.viewHolder()
-                    .adapterPosition
+            val position = itemView.viewHolder().adapterPosition
+            if (position < 0) return@OnClickListener
             getSelectionStateProvider(position).use {
                 this.itemOnClick?.invoke(it, position)
                 setup.globalOnClick?.invoke(it, position)

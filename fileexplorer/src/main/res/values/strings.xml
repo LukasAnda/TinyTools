@@ -3,6 +3,8 @@
     <string name="storage_internal">Internal storage</string>
     <string name="storage_sd_card">SD Card</string>
     <string name="root_directory">Root</string>
+    <string name="open_drawer">Open drawer</string>
+    <string name="close_drawer">Close drawer</string>
 
     <plurals name="folder_size">
         <item quantity="one">%d item</item>

@@ -1,11 +1,13 @@
 package com.tinytools.files.ui.files.viewmodel
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.tinytools.common.viewmodel.BaseViewModel
 import com.tinytools.common.views.DrawerView
+import com.tinytools.files.R
 import com.tinytools.files.filesystem.HybridFile
 import com.tinytools.files.filesystem.getStorageDirectories
 import com.tinytools.files.model.ui.HybridFileItem
@@ -50,7 +52,7 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
         viewModelScope.launch(Dispatchers.IO) {
             // Todo load preferred directory style grid/linear
             currentPageStyle.postValue(PageStyle.List)
-            val files = directory.listFiles(context, true).map { HybridFileItem.HybridFileLinearItem(it.name(context), Icon(), it.readableSize(context), it.getTypedFile(context), "") }
+            val files = directory.listFiles(context, true).map { HybridFileItem.HybridFileLinearItem(it.name(context), it.getIcon(context), it.readableSize(context), it.getTypedFile(context), "") }
             pageItems.postValue(files)
         }
     }

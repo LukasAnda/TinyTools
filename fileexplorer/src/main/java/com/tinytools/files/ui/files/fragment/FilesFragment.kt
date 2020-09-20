@@ -43,13 +43,10 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
 
         (activity as? AppCompatActivity)?.run {
             setSupportActionBar(binding?.toolbar)
-            toggle = ActionBarDrawerToggle(this, binding?.root, R.string.nav_app_bar_open_drawer_description, R.string.nav_app_bar_navigate_up_description)
+            toggle = ActionBarDrawerToggle(this, binding?.root, R.string.open_drawer, R.string.close_drawer)
             binding?.root?.addDrawerListener(toggle!!)
             toggle?.syncState()
             supportActionBar?.run {
-//                setDisplayHomeAsUpEnabled(true)
-//                setHomeButtonEnabled(true)
-
                 setDisplayHomeAsUpEnabled(true)
                 setDisplayShowHomeEnabled(true)
             }
@@ -142,6 +139,10 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
                 onBind { binding, index, item ->
                     binding.text.text = item.name
                     binding.size.text = item.size
+                    when {
+                        item.icon.bitmap != null -> binding.icon.setImageBitmap(item.icon.bitmap)
+                        item.icon.resource != 0 -> binding.icon.setImageResource(item.icon.resource)
+                    }
                 }
 
                 onClick {
@@ -152,6 +153,10 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
             withItem<HybridFileItem.HybridFileGridItem, FilesItemGridBinding>(FilesItemGridBinding::inflate) {
                 onBind { binding, index, item ->
                     binding.text.text = item.name
+                    when {
+                        item.icon.bitmap != null -> binding.icon.setImageBitmap(item.icon.bitmap)
+                        item.icon.resource != 0 -> binding.icon.setImageResource(item.icon.resource)
+                    }
                 }
 
                 onClick {
