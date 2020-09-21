@@ -15,6 +15,7 @@ import com.tinytools.files.filesystem.getLibraryDirectories
 import com.tinytools.files.filesystem.getStorageDirectories
 import com.tinytools.files.filesystem.listApks
 import com.tinytools.files.filesystem.listAudio
+import com.tinytools.files.filesystem.listDocs
 import com.tinytools.files.filesystem.listImages
 import com.tinytools.files.filesystem.listVideo
 import com.tinytools.files.model.ui.Directory
@@ -78,10 +79,11 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
                 Images -> listImages(context)
                 Video -> listVideo(context)
                 Audio -> listAudio(context)
-                Documents -> emptyList()
+                Documents -> listDocs(context)
                 Apps -> listApks(context)
                 Archives -> emptyList()
-            }
+            }.sortedByDescending { it.lastModified() }
+
             currentPageStyle.postValue(PageStyle.List)
             val files = filesToProcess.map { HybridFileItem.HybridFileLinearItem(it.name(context), it.getIcon(context), it.readableSize(context), it.getTypedFile(context), "") }
             pageItems.postValue(files)

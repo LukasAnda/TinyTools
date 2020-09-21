@@ -143,9 +143,9 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
                 onBind { binding, index, item ->
                     binding.text.text = item.name
                     binding.size.text = item.size
+                    // Default path is empty string so Coil will fail and show error. This allows us to omit if-else
                     binding.icon.load(File(item.icon.path)) {
                         error(item.icon.resource)
-//                        transformations(CircleCropTransformation())
                     }
                 }
 
@@ -157,6 +157,7 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
             withItem<HybridFileItem.HybridFileGridItem, FilesItemGridBinding>(FilesItemGridBinding::inflate) {
                 onBind { binding, index, item ->
                     binding.text.text = item.name
+                    // Default path is empty string so Coil will fail and show error. This allows us to omit if-else
                     binding.icon.load(File(item.icon.path)) {
                         error(item.icon.resource)
                     }

@@ -251,8 +251,52 @@ suspend fun listVideo(context: Context): List<HybridFile> = withContext(Dispatch
     return@withContext files
 }
 
+//TODO replace with actual mime type check by extension to have it in one place
 suspend fun listDocs(context: Context): List<HybridFile> = withContext(Dispatchers.IO) {
-    return@withContext emptyList()
+    val files = mutableListOf<HybridFile>()
+    val projection = arrayOf(MediaStore.Files.FileColumns.DATA)
+    val cursor = context
+            .contentResolver
+            .query(MediaStore.Files.getContentUri("external"), projection, null, null, null)
+    val types = listOf(
+            ".pdf",
+            ".xml",
+            ".html",
+            ".asm",
+            ".text/x-asm",
+            ".def",
+            ".in",
+            ".rc",
+            ".list",
+            ".log",
+            ".pl",
+            ".prop",
+            ".properties",
+            ".rc",
+            ".doc",
+            ".docx",
+            ".msg",
+            ".odt",
+            ".pages",
+            ".rtf",
+            ".txt",
+            ".wpd",
+            ".wps"
+    )
+    if (cursor == null) {
+        return@withContext files
+    } else if (cursor.count > 0 && cursor.moveToFirst()) {
+        do {
+            val path = cursor.getString(cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA))
+            if (path != null && types.contains(path)) {
+                val file = HybridFile(path).getTypedFile(context)
+                files.add(file)
+            }
+        } while (cursor.moveToNext())
+    }
+    cursor.close()
+
+    return@withContext files
 }
 
 suspend fun listApks(context: Context): List<HybridFile> = withContext(Dispatchers.IO) {
