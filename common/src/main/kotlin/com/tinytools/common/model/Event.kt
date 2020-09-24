@@ -1,4 +1,4 @@
-package com.lukasanda.nioba.base
+package com.tinytools.common.model
 
 // Event class, so we can propagate events happening inside activity. We don't need to post data on Success because we observe them as LiveData
 sealed class Event {

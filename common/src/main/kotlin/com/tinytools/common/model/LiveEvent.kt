@@ -1,4 +1,4 @@
-package com.lukasanda.nioba.base
+package com.tinytools.common.model
 
 import androidx.annotation.MainThread
 import androidx.collection.ArraySet

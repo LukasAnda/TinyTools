@@ -1,6 +1,5 @@
-package com.tinytools.files.model.ui
+package com.tinytools.files.data.ui
 
-import android.graphics.Bitmap
 import androidx.annotation.DrawableRes
 import com.tinytools.files.filesystem.HybridFile
 

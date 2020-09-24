@@ -1,4 +1,4 @@
-package com.tinytools.files.model.ui
+package com.tinytools.files.data.ui
 
 import com.tinytools.files.filesystem.LibraryFile
 

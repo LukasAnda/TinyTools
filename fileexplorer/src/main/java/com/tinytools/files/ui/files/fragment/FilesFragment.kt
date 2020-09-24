@@ -9,31 +9,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import coil.load
-import coil.transform.CircleCropTransformation
-import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.tinytools.common.fragments.BaseFragment
+import com.tinytools.common.model.Event
 import com.tinytools.common.recyclical.datasource.dataSourceOf
 import com.tinytools.common.recyclical.handle.RecyclicalHandle
 import com.tinytools.common.recyclical.setup
 import com.tinytools.common.recyclical.withItem
 import com.tinytools.common.views.DrawerView
 import com.tinytools.files.R
+import com.tinytools.files.data.ui.Directory
+import com.tinytools.files.data.ui.HybridFileItem
+import com.tinytools.files.data.ui.PageViewStyle
 import com.tinytools.files.databinding.FilesFragmentBinding
 import com.tinytools.files.databinding.FilesItemGridBinding
 import com.tinytools.files.databinding.FilesItemLinearBinding
-import com.tinytools.files.model.ui.Directory
-import com.tinytools.files.model.ui.HybridFileItem
-import com.tinytools.files.model.ui.PageStyle
-import com.tinytools.files.ui.MainActivityViewModel
 import com.tinytools.files.ui.files.viewmodel.FilesFragmentViewModel
-import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
 
 class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHandler {
     override fun getViewBinding() = FilesFragmentBinding.inflate(layoutInflater)
     private val viewModel by viewModel<FilesFragmentViewModel>()
-    private val activityViewModel by sharedViewModel<MainActivityViewModel>()
 
     private var directoryItems = dataSourceOf()
 
@@ -72,6 +68,10 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
         binding?.swap?.setOnClickListener {
             viewModel.changeDirectoryStyle()
         }
+
+        binding?.refreshLayout?.setOnRefreshListener {
+            binding?.refreshLayout?.isRefreshing = false
+        }
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -86,8 +86,8 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
             viewModel.pageStyle().observe(viewLifecycleOwner, {
                 // TODO adjust dynamic span count based on screen width
                 when (it) {
-                    PageStyle.List -> manager?.spanCount = 1
-                    PageStyle.Grid -> manager?.spanCount = 3
+                    PageViewStyle.List -> manager?.spanCount = 1
+                    PageViewStyle.Grid -> manager?.spanCount = 3
                 }
             })
 
@@ -99,6 +99,20 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
 
             viewModel.configuration().observe(viewLifecycleOwner, {
                 binding?.drawer?.reloadConfiguration(it.apply { handler = this@FilesFragment })
+            })
+
+            viewModel.events().observe(viewLifecycleOwner, {
+                when (it) {
+                    Event.Loading -> {
+                        binding?.refreshLayout?.isRefreshing = true
+                    }
+                    is Event.Failure -> {
+                        binding?.refreshLayout?.isRefreshing = false
+                    }
+                    Event.Success -> {
+                        binding?.refreshLayout?.isRefreshing = false
+                    }
+                }
             })
         }
     }
@@ -172,7 +186,10 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
 
     override fun onItemSelected(item: DrawerView.Item) {
         when (val payload = item.item) {
-            is Directory -> viewModel.changeDirectory(payload)
+            is Directory -> {
+                directoryItems.set(emptyList())
+                viewModel.changeDirectory(payload)
+            }
         }
         closeDrawerIfPossible()
     }

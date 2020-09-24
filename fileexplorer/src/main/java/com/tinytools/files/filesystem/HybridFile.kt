@@ -3,8 +3,7 @@ package com.tinytools.files.filesystem
 import android.content.Context
 import com.tinytools.files.R
 import com.tinytools.files.helpers.formatAsFileSize
-import com.tinytools.files.model.ui.HybridFileItem
-import com.tinytools.files.model.ui.Icon
+import com.tinytools.files.data.ui.Icon
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream

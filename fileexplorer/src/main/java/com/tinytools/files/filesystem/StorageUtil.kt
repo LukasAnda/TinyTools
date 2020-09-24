@@ -11,8 +11,8 @@ import android.provider.MediaStore
 import android.text.TextUtils
 import androidx.annotation.DrawableRes
 import com.tinytools.files.R
-import com.tinytools.files.model.ui.LibraryDirectory
-import com.tinytools.files.model.ui.StorageDirectory
+import com.tinytools.files.data.ui.LibraryDirectory
+import com.tinytools.files.data.ui.StorageDirectory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File

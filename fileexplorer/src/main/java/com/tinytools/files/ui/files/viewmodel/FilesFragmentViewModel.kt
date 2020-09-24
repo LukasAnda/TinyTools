@@ -1,16 +1,26 @@
 package com.tinytools.files.ui.files.viewmodel
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.tinytools.common.viewmodel.BaseViewModel
 import com.tinytools.common.views.DrawerView
 import com.tinytools.files.R
+import com.tinytools.files.data.ui.Directory
+import com.tinytools.files.data.ui.HybridFileItem
+import com.tinytools.files.data.ui.LibraryDirectory
+import com.tinytools.files.data.ui.PageViewStyle
+import com.tinytools.files.data.ui.StorageDirectory
 import com.tinytools.files.filesystem.HybridFile
 import com.tinytools.files.filesystem.LibraryFile
-import com.tinytools.files.filesystem.LibraryFile.*
+import com.tinytools.files.filesystem.LibraryFile.Apps
+import com.tinytools.files.filesystem.LibraryFile.Archives
+import com.tinytools.files.filesystem.LibraryFile.Audio
+import com.tinytools.files.filesystem.LibraryFile.Documents
+import com.tinytools.files.filesystem.LibraryFile.Images
+import com.tinytools.files.filesystem.LibraryFile.Recents
+import com.tinytools.files.filesystem.LibraryFile.Video
 import com.tinytools.files.filesystem.getLibraryDirectories
 import com.tinytools.files.filesystem.getStorageDirectories
 import com.tinytools.files.filesystem.listApks
@@ -18,19 +28,14 @@ import com.tinytools.files.filesystem.listAudio
 import com.tinytools.files.filesystem.listDocs
 import com.tinytools.files.filesystem.listImages
 import com.tinytools.files.filesystem.listVideo
-import com.tinytools.files.model.ui.Directory
-import com.tinytools.files.model.ui.HybridFileItem
-import com.tinytools.files.model.ui.Icon
-import com.tinytools.files.model.ui.LibraryDirectory
-import com.tinytools.files.model.ui.PageStyle
-import com.tinytools.files.model.ui.StorageDirectory
+import com.tinytools.files.repository.PageStyleRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class FilesFragmentViewModel(application: Application) : BaseViewModel(application) {
+class FilesFragmentViewModel(application: Application, private val pageStyleRepository: PageStyleRepository) : BaseViewModel(application) {
     private val pageItems = MutableLiveData<List<HybridFileItem>>()
     private var currentDirectory: HybridFile? = null
-    private val currentPageStyle = MutableLiveData<PageStyle>()
+    private val currentPageStyle = MutableLiveData<PageViewStyle>()
 
     private val _drawerConfiguration = MutableLiveData<DrawerView.Configuration>()
 
@@ -47,7 +52,7 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
         _currentDirectory.postValue(getStorageDirectories(context).first())
     }
 
-    fun changeDirectory(directory: Directory){
+    fun changeDirectory(directory: Directory) {
         _currentDirectory.postValue(directory)
     }
 
@@ -55,26 +60,36 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
     fun pageItems(): LiveData<List<HybridFileItem>> = pageItems
 
     fun listFiles(directory: Directory) {
-        when(directory){
+        when (directory) {
             is StorageDirectory -> listFiles(HybridFile(directory.path).getTypedFile(context))
             is LibraryDirectory -> listFiles(directory.type)
         }
     }
 
     fun listFiles(directory: HybridFile) {
+        pageItems.postValue(emptyList())
         currentDirectory = directory
-        viewModelScope.launch(Dispatchers.IO) {
-            // Todo load preferred directory style grid/linear
-            currentPageStyle.postValue(PageStyle.List)
-            val files = directory.listFiles(context, true).map { HybridFileItem.HybridFileLinearItem(it.name(context), it.getIcon(context), it.readableSize(context), it.getTypedFile(context), "") }
-            pageItems.postValue(files)
+        launchAsync {
+            val style = pageStyleRepository.getPage(directory.path)
+            currentPageStyle.postValue(style.viewStyle)
+            val files = directory.listFiles(context, true)
+            mapFilesToItems(files, style.viewStyle)
         }
     }
 
-    private fun listFiles(directory: LibraryFile){
+    private suspend fun mapFilesToItems(files: List<HybridFile>, style: PageViewStyle) {
+        val items = when (style) {
+            PageViewStyle.List -> files.map { HybridFileItem.HybridFileLinearItem(it.name(context), it.getIcon(context), it.readableSize(context), it.getTypedFile(context), "") }
+            PageViewStyle.Grid -> files.map { HybridFileItem.HybridFileGridItem(it.name(context), it.getIcon(context), it.readableSize(context), it.getTypedFile(context), "") }
+        }
+        pageItems.postValue(items)
+    }
+
+    private fun listFiles(directory: LibraryFile) {
+        pageItems.postValue(emptyList())
         currentDirectory = null
-        viewModelScope.launch(Dispatchers.IO){
-            val filesToProcess = when(directory){
+        launchAsync {
+            val files = when (directory) {
                 Recents -> emptyList()
                 Images -> listImages(context)
                 Video -> listVideo(context)
@@ -84,27 +99,29 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
                 Archives -> emptyList()
             }.sortedByDescending { it.lastModified() }
 
-            currentPageStyle.postValue(PageStyle.List)
-            val files = filesToProcess.map { HybridFileItem.HybridFileLinearItem(it.name(context), it.getIcon(context), it.readableSize(context), it.getTypedFile(context), "") }
-            pageItems.postValue(files)
+            val style = pageStyleRepository.getPage(directory.name)
+            currentPageStyle.postValue(style.viewStyle)
+
+            mapFilesToItems(files, style.viewStyle)
         }
     }
 
     fun changeDirectoryStyle() {
-        // TODO add saving this style to database
-        var items = pageItems.value ?: emptyList()
-        items = when {
-            items.any { it is HybridFileItem.HybridFileLinearItem } -> {
-                currentPageStyle.postValue(PageStyle.Grid)
-                items.map { HybridFileItem.HybridFileGridItem(it.name, it.icon, it.size, it.file, it.permissions) }
+        launchAsync {
+            val items = pageItems.value ?: emptyList()
+            val newStyle = when {
+                items.any { it is HybridFileItem.HybridFileLinearItem } -> {
+                    PageViewStyle.Grid
+                }
+                items.any { it is HybridFileItem.HybridFileGridItem } -> {
+                    PageViewStyle.List
+                }
+                else -> error("Unknown item type")
             }
-            items.any { it is HybridFileItem.HybridFileGridItem } -> {
-                currentPageStyle.postValue(PageStyle.List)
-                items.map { HybridFileItem.HybridFileLinearItem(it.name, it.icon, it.size, it.file, it.permissions) }
-            }
-            else -> error("Unknown item type")
+            pageStyleRepository.setViewStyle(currentDirectory?.path.orEmpty(), newStyle)
+            mapFilesToItems(items.map { it.file }, newStyle)
+            currentPageStyle.postValue(newStyle)
         }
-        pageItems.postValue(items)
     }
 
     fun navigateUp() {
@@ -125,5 +142,5 @@ class FilesFragmentViewModel(application: Application) : BaseViewModel(applicati
         _drawerConfiguration.postValue(configuration)
     }
 
-    fun pageStyle(): LiveData<PageStyle> = currentPageStyle
+    fun pageStyle(): LiveData<PageViewStyle> = currentPageStyle
 }
