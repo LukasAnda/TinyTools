@@ -16,6 +16,13 @@
     <string name="library">Library</string>
     <string name="menu_list">Show as list</string>
     <string name="menu_grid">Show as grid</string>
+    <string name="menu_sort">Sort type</string>
+    <string name="sort_dialog__title">Sort by</string>
+    <string name="sort_dialog__ascending">Ascending</string>
+    <string name="sort_dialog__descending">Descending</string>
+    <string name="sort_dialog__sort_name">File name</string>
+    <string name="sort_dialog__sort_size">Size of the file</string>
+    <string name="sort_dialog__sort_date">Modification date</string>
 
     <plurals name="folder_size">
         <item quantity="one">%d item</item>

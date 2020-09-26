@@ -8,7 +8,14 @@
         <item name="colorSecondaryVariant">@color/colorSecondaryVariant</item>
         <item name="colorOnSecondary">@color/colorOnSecondary</item>
         <item name="android:statusBarColor">@color/colorPrimaryVariant</item>
+
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.YourApp.LargeComponent</item>
         <!-- Add this line -->
         <item name="viewInflaterClass">xyz.aprildown.theme.ThemeViewInflater</item>
+    </style>
+
+    <style name="ShapeAppearance.YourApp.LargeComponent" parent="ShapeAppearance.MaterialComponents.LargeComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
     </style>
 </resources>

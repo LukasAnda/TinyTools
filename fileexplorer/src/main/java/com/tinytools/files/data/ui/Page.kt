@@ -10,7 +10,7 @@ enum class PageViewStyle {
 }
 
 enum class PageSortType {
-    Name, Date, Size, Type
+    Name, Date, Size
 }
 
 enum class PageSortOrder {

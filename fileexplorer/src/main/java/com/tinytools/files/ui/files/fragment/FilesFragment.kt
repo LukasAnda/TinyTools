@@ -11,11 +11,13 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.setPadding
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import coil.load
 import coil.request.CachePolicy
 import coil.transform.CircleCropTransformation
 import com.tinytools.common.fragments.BaseFragment
+import com.tinytools.common.helpers.getNavigationResult
 import com.tinytools.common.model.Event
 import com.tinytools.common.recyclical.datasource.dataSourceOf
 import com.tinytools.common.recyclical.handle.RecyclicalHandle
@@ -33,6 +35,8 @@ import com.tinytools.files.helpers.MimeType
 import com.tinytools.files.helpers.getColor
 import com.tinytools.files.helpers.getIcon
 import com.tinytools.files.helpers.px
+import com.tinytools.files.ui.files.dialogs.SORT_BY_KEY
+import com.tinytools.files.ui.files.dialogs.SortDialog
 import com.tinytools.files.ui.files.viewmodel.FilesFragmentViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
@@ -92,7 +96,7 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
             viewModel.pageStyle().observe(viewLifecycleOwner, {
                 activity?.invalidateOptionsMenu()
                 // TODO adjust dynamic span count based on screen width
-                when (it) {
+                when (it.viewStyle) {
                     PageViewStyle.List -> manager?.spanCount = 1
                     PageViewStyle.Grid -> manager?.spanCount = 3
                 }
@@ -126,7 +130,7 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.files__menu, menu)
-        when (viewModel.pageStyle().value) {
+        when (viewModel.pageStyle().value?.viewStyle) {
             PageViewStyle.List -> {
                 menu.findItem(R.id.list).isVisible = false
                 menu.findItem(R.id.grid).isVisible = true
@@ -151,6 +155,9 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
                 viewModel.changeDirectoryStyle()
                 return true
             }
+            R.id.sort -> {
+                manageSortType()
+            }
         }
         return false
     }
@@ -160,6 +167,16 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
         recyclicalHandle = null
         manager = null
         toggle = null
+    }
+
+    override fun onItemSelected(item: DrawerView.Item) {
+        when (val payload = item.item) {
+            is Directory -> {
+                directoryItems.set(emptyList())
+                viewModel.changeDirectory(payload)
+            }
+        }
+        closeDrawerIfPossible()
     }
 
     private fun areTheSame(left: Any, right: Any): Boolean {
@@ -249,21 +266,19 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
         }
     }
 
-    override fun onItemSelected(item: DrawerView.Item) {
-        when (val payload = item.item) {
-            is Directory -> {
-                directoryItems.set(emptyList())
-                viewModel.changeDirectory(payload)
-            }
-        }
-        closeDrawerIfPossible()
-    }
-
     private fun closeDrawerIfPossible(): Boolean {
         if (binding?.root?.isDrawerOpen(GravityCompat.START) == true) {
             binding?.root?.closeDrawer(GravityCompat.START)
             return true
         }
         return false
+    }
+
+    private fun manageSortType() {
+        findNavController().navigate(FilesFragmentDirections.actionFilesFragmentToSortDialog())
+
+        getNavigationResult<SortDialog.SortDialogResult>(R.id.filesFragment, SORT_BY_KEY){
+            viewModel.changeSortStyle(it.sortType, it.sortOrder)
+        }
     }
 }

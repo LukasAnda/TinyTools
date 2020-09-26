@@ -14,10 +14,4 @@ class MainActivity : ThemedActivity<MainActivityBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
-
-    override fun onResume() {
-        super.onResume()
-        supportFragmentManager.beginTransaction().replace(binding.container.id, FilesFragment()).commit()
-
-    }
 }

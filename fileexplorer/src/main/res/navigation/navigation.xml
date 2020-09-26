@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/filesFragment">
+
+    <fragment
+        android:id="@+id/filesFragment"
+        android:name="com.tinytools.files.ui.files.fragment.FilesFragment"
+        android:label="FilesFragment"
+        tools:layout="@layout/files__fragment" >
+        <action
+            android:id="@+id/action_filesFragment_to_sortDialog"
+            app:destination="@id/sortDialog" />
+    </fragment>
+    <dialog
+        android:id="@+id/sortDialog"
+        android:name="com.tinytools.files.ui.files.dialogs.SortDialog"
+        android:label="SortDialog"
+        tools:layout="@layout/sort__dialog_fragment" />
+</navigation>
