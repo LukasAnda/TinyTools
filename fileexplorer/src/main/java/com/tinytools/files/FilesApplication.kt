@@ -9,6 +9,7 @@ import com.tinytools.files.di.dbModule
 import com.tinytools.files.di.repositoryModule
 import com.tinytools.files.di.viewModelsModule
 import com.tinytools.files.helpers.ApkIconFetcher
+import com.tinytools.files.helpers.VideoIconFetcher
 import org.koin.core.module.Module
 
 class FilesApplication : TinyApplication() {
@@ -20,8 +21,7 @@ class FilesApplication : TinyApplication() {
 
         val imageLoader = ImageLoader.Builder(this)
                 .componentRegistry {
-                    add(VideoFrameFileFetcher(this@FilesApplication))
-                    add(VideoFrameUriFetcher(this@FilesApplication))
+                    add(VideoIconFetcher(this@FilesApplication))
                     add(ApkIconFetcher(this@FilesApplication))
                 }
                 .build()

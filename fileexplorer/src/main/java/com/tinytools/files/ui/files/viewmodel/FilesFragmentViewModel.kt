@@ -28,6 +28,7 @@ import com.tinytools.files.filesystem.listAudio
 import com.tinytools.files.filesystem.listDocs
 import com.tinytools.files.filesystem.listImages
 import com.tinytools.files.filesystem.listVideo
+import com.tinytools.files.helpers.getFileType
 import com.tinytools.files.repository.PageStyleRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,6 +41,8 @@ class FilesFragmentViewModel(application: Application, private val pageStyleRepo
     private val _drawerConfiguration = MutableLiveData<DrawerView.Configuration>()
 
     private val _currentDirectory: MutableLiveData<Directory> = MutableLiveData<Directory>()
+
+    var shouldShowIcon = true
 
     init {
         loadLastOpenedDirectory()
@@ -79,8 +82,8 @@ class FilesFragmentViewModel(application: Application, private val pageStyleRepo
 
     private suspend fun mapFilesToItems(files: List<HybridFile>, style: PageViewStyle) {
         val items = when (style) {
-            PageViewStyle.List -> files.map { HybridFileItem.HybridFileLinearItem(it.name(context), it.getIcon(context), it.readableSize(context), it.getTypedFile(context), "") }
-            PageViewStyle.Grid -> files.map { HybridFileItem.HybridFileGridItem(it.name(context), it.getIcon(context), it.readableSize(context), it.getTypedFile(context), "") }
+            PageViewStyle.List -> files.map { HybridFileItem.HybridFileLinearItem(it.name(context), it.getFileType(context), it.readableSize(context), it.getTypedFile(context), "") }
+            PageViewStyle.Grid -> files.map { HybridFileItem.HybridFileGridItem(it.name(context), it.getFileType(context), it.readableSize(context), it.getTypedFile(context), "") }
         }
         pageItems.postValue(items)
     }

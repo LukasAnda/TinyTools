@@ -1,5 +1,6 @@
 package com.tinytools.files.ui.files.fragment
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
@@ -7,8 +8,11 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.core.view.setPadding
 import androidx.recyclerview.widget.GridLayoutManager
 import coil.load
+import coil.request.CachePolicy
+import coil.transform.CircleCropTransformation
 import com.tinytools.common.fragments.BaseFragment
 import com.tinytools.common.model.Event
 import com.tinytools.common.recyclical.datasource.dataSourceOf
@@ -23,6 +27,10 @@ import com.tinytools.files.data.ui.PageViewStyle
 import com.tinytools.files.databinding.FilesFragmentBinding
 import com.tinytools.files.databinding.FilesItemGridBinding
 import com.tinytools.files.databinding.FilesItemLinearBinding
+import com.tinytools.files.helpers.MimeType
+import com.tinytools.files.helpers.getColor
+import com.tinytools.files.helpers.getIcon
+import com.tinytools.files.helpers.px
 import com.tinytools.files.ui.files.viewmodel.FilesFragmentViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.io.File
@@ -157,9 +165,28 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
                 onBind { binding, index, item ->
                     binding.text.text = item.name
                     binding.size.text = item.size
+
                     // Default path is empty string so Coil will fail and show error. This allows us to omit if-else
-                    binding.icon.load(File(item.icon.path)) {
-                        error(item.icon.resource)
+                    binding.icon.load(File(item.file.path)) {
+                        diskCachePolicy(CachePolicy.ENABLED)
+                        memoryCachePolicy(CachePolicy.ENABLED)
+                        error(item.type.getIcon())
+                        if (item.type == MimeType.Image || item.type == MimeType.Video) {
+                            transformations(CircleCropTransformation())
+                        }
+                        target(
+                                onError = { drawable ->
+                                    binding.iconBackground.setBackgroundColor(item.type.getColor(resources))
+                                    binding.icon.setImageDrawable(drawable)
+                                    binding.icon.setPadding(8.px)
+                                },
+
+                                onSuccess = { drawable ->
+                                    binding.iconBackground.setBackgroundColor(Color.TRANSPARENT)
+                                    binding.icon.setImageDrawable(drawable)
+                                    binding.icon.setPadding(0)
+                                }
+                        )
                     }
                 }
 
@@ -172,8 +199,23 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
                 onBind { binding, index, item ->
                     binding.text.text = item.name
                     // Default path is empty string so Coil will fail and show error. This allows us to omit if-else
-                    binding.icon.load(File(item.icon.path)) {
-                        error(item.icon.resource)
+                    binding.icon.load(File(item.file.path)) {
+                        diskCachePolicy(CachePolicy.ENABLED)
+                        memoryCachePolicy(CachePolicy.ENABLED)
+                        error(item.type.getIcon())
+                        target(
+                                onError = { drawable ->
+                                    binding.iconBackground.setBackgroundColor(item.type.getColor(resources))
+                                    binding.icon.setImageDrawable(drawable)
+                                    binding.icon.setPadding(32.px)
+                                },
+
+                                onSuccess = { drawable ->
+                                    binding.iconBackground.setBackgroundColor(Color.TRANSPARENT)
+                                    binding.icon.setImageDrawable(drawable)
+                                    binding.icon.setPadding(16.px)
+                                }
+                        )
                     }
                 }
 

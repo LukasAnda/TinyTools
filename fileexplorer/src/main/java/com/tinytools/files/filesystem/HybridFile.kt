@@ -40,12 +40,4 @@ open class HybridFile(open var path: String) {
     open fun setLastModified(lastModified: Long): Boolean = false
     open fun mkdirs(context: Context): Boolean = false
     open fun delete(context: Context): Boolean = false
-
-    fun getIcon(context: Context): Icon {
-        return if(isDirectory(context)){
-            Icon(R.drawable.ic_folder)
-        } else {
-            Icon(R.drawable.ic_file, path)
-        }
-    }
 }
