@@ -14,6 +14,8 @@
     <string name="library_archives">Archives</string>
     <string name="storage">Storage</string>
     <string name="library">Library</string>
+    <string name="menu_list">Show as list</string>
+    <string name="menu_grid">Show as grid</string>
 
     <plurals name="folder_size">
         <item quantity="one">%d item</item>

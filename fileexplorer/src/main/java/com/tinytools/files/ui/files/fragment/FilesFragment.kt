@@ -2,6 +2,8 @@ package com.tinytools.files.ui.files.fragment
 
 import android.graphics.Color
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.activity.OnBackPressedCallback
@@ -73,10 +75,6 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
             }
         })
 
-        binding?.swap?.setOnClickListener {
-            viewModel.changeDirectoryStyle()
-        }
-
         binding?.refreshLayout?.setOnRefreshListener {
             binding?.refreshLayout?.isRefreshing = false
         }
@@ -92,6 +90,7 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
             })
 
             viewModel.pageStyle().observe(viewLifecycleOwner, {
+                activity?.invalidateOptionsMenu()
                 // TODO adjust dynamic span count based on screen width
                 when (it) {
                     PageViewStyle.List -> manager?.spanCount = 1
@@ -125,9 +124,33 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
         }
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.files__menu, menu)
+        when (viewModel.pageStyle().value) {
+            PageViewStyle.List -> {
+                menu.findItem(R.id.list).isVisible = false
+                menu.findItem(R.id.grid).isVisible = true
+            }
+            PageViewStyle.Grid -> {
+                menu.findItem(R.id.list).isVisible = true
+                menu.findItem(R.id.grid).isVisible = false
+            }
+            null -> {
+                menu.findItem(R.id.list).isVisible = false
+                menu.findItem(R.id.grid).isVisible = false
+            }
+        }
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (toggle?.onOptionsItemSelected(item) == true) {
             return true
+        }
+        when (item.itemId) {
+            R.id.list, R.id.grid -> {
+                viewModel.changeDirectoryStyle()
+                return true
+            }
         }
         return false
     }
