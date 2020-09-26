@@ -54,10 +54,10 @@
 
     <com.tinytools.common.views.DrawerView
         android:id="@+id/drawer"
+        android:background="?attr/colorSurface"
         android:layout_width="300dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/white"
         android:gravity="start"
         android:orientation="vertical" />
 
