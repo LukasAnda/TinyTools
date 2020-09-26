@@ -23,6 +23,7 @@
     <string name="sort_dialog__sort_name">File name</string>
     <string name="sort_dialog__sort_size">Size of the file</string>
     <string name="sort_dialog__sort_date">Modification date</string>
+    <string name="exit_app_prompt">Press back one more time to exit</string>
 
     <plurals name="folder_size">
         <item quantity="one">%d item</item>

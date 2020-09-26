@@ -18,6 +18,7 @@ import coil.request.CachePolicy
 import coil.transform.CircleCropTransformation
 import com.tinytools.common.fragments.BaseFragment
 import com.tinytools.common.helpers.getNavigationResult
+import com.tinytools.common.helpers.onBackPressedTwiceFinish
 import com.tinytools.common.model.Event
 import com.tinytools.common.recyclical.datasource.dataSourceOf
 import com.tinytools.common.recyclical.handle.RecyclicalHandle
@@ -75,7 +76,9 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
         activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (closeDrawerIfPossible()) return
-                viewModel.navigateUp()
+                if (!viewModel.navigateUp()) {
+                    activity?.onBackPressedTwiceFinish(R.string.exit_app_prompt)
+                }
             }
         })
 
@@ -277,7 +280,7 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
     private fun manageSortType() {
         findNavController().navigate(FilesFragmentDirections.actionFilesFragmentToSortDialog())
 
-        getNavigationResult<SortDialog.SortDialogResult>(R.id.filesFragment, SORT_BY_KEY){
+        getNavigationResult<SortDialog.SortDialogResult>(R.id.filesFragment, SORT_BY_KEY) {
             viewModel.changeSortStyle(it.sortType, it.sortOrder)
         }
     }

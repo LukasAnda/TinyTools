@@ -7,16 +7,17 @@ import androidx.lifecycle.viewModelScope
 import com.tinytools.common.viewmodel.BaseViewModel
 import com.tinytools.common.views.DrawerView
 import com.tinytools.files.R
-import com.tinytools.files.data.db.model.SortOrder
-import com.tinytools.files.data.db.model.SortType
 import com.tinytools.files.data.ui.Directory
 import com.tinytools.files.data.ui.HybridFileItem
 import com.tinytools.files.data.ui.LibraryDirectory
 import com.tinytools.files.data.ui.Page
 import com.tinytools.files.data.ui.PageSortOrder
-import com.tinytools.files.data.ui.PageSortOrder.*
+import com.tinytools.files.data.ui.PageSortOrder.Ascending
+import com.tinytools.files.data.ui.PageSortOrder.Descending
 import com.tinytools.files.data.ui.PageSortType
-import com.tinytools.files.data.ui.PageSortType.*
+import com.tinytools.files.data.ui.PageSortType.Date
+import com.tinytools.files.data.ui.PageSortType.Name
+import com.tinytools.files.data.ui.PageSortType.Size
 import com.tinytools.files.data.ui.PageViewStyle
 import com.tinytools.files.data.ui.StorageDirectory
 import com.tinytools.files.filesystem.HybridFile
@@ -37,9 +38,7 @@ import com.tinytools.files.filesystem.listImages
 import com.tinytools.files.filesystem.listVideo
 import com.tinytools.files.helpers.getFileType
 import com.tinytools.files.repository.PageStyleRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class FilesFragmentViewModel(application: Application, private val pageStyleRepository: PageStyleRepository) : BaseViewModel(application) {
     private val pageItems = MutableLiveData<List<HybridFileItem>>()
@@ -88,20 +87,20 @@ class FilesFragmentViewModel(application: Application, private val pageStyleRepo
         }
     }
 
-    private suspend fun mapFilesToItems(files: List<HybridFile>, style: Page){
+    private suspend fun mapFilesToItems(files: List<HybridFile>, style: Page) {
         var items = when (style.viewStyle) {
             PageViewStyle.List -> files.map { HybridFileItem.HybridFileLinearItem(it.name(context), it.getFileType(context), it.readableSize(context), it.getTypedFile(context), "") }
             PageViewStyle.Grid -> files.map { HybridFileItem.HybridFileGridItem(it.name(context), it.getFileType(context), it.readableSize(context), it.getTypedFile(context), "") }
         }
 
-        items = when(style.sortType){
+        items = when (style.sortType) {
             Name -> items.sortedBy { it.name }
             Date -> items.sortedBy { it.file.lastModified() }
             // We need this additional mapping because of coroutines
             Size -> items.map { Pair(it.file.size(context), it) }.sortedBy { it.first }.map { it.second }
         }
 
-        items = when(style.sortOrder){
+        items = when (style.sortOrder) {
             Ascending -> items
             Descending -> items.asReversed()
         }
@@ -149,7 +148,7 @@ class FilesFragmentViewModel(application: Application, private val pageStyleRepo
         }
     }
 
-    fun changeSortStyle(sortType: PageSortType, sortOrder: PageSortOrder){
+    fun changeSortStyle(sortType: PageSortType, sortOrder: PageSortOrder) {
         launchAsync {
             val items = pageItems.value ?: emptyList()
 
@@ -162,9 +161,11 @@ class FilesFragmentViewModel(application: Application, private val pageStyleRepo
         }
     }
 
-    fun navigateUp() {
-        val parentDirectoryPath = currentDirectory?.parent(context).orEmpty()
+    fun navigateUp(): Boolean {
+        val parentDirectoryPath = currentDirectory?.parent(context) ?: return false
         listFiles(HybridFile(parentDirectoryPath).getTypedFile(context))
+
+        return true
     }
 
     fun configuration(): LiveData<DrawerView.Configuration> = _drawerConfiguration
