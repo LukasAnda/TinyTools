@@ -17,7 +17,7 @@ buildscript {
         maven { url 'https://dl.bintray.com/kotlin/kotlin-eap' }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0-rc03'
+        classpath 'com.android.tools.build:gradle:4.1.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "androidx.navigation:navigation-safe-args-gradle-plugin:$libraries.navigation_safe_args__version"
 
@@ -117,8 +117,8 @@ subprojects {
             }
 
             dependencies {
-                implementation 'androidx.core:core-ktx:1.3.1'
-                implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+                implementation 'androidx.core:core-ktx:1.3.2'
+                implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
                 implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 
                 implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9'
@@ -149,8 +149,8 @@ subprojects {
                 implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
 
                 // Navigation
-                implementation 'androidx.navigation:navigation-fragment-ktx:2.3.0'
-                implementation 'androidx.navigation:navigation-ui-ktx:2.3.0'
+                implementation 'androidx.navigation:navigation-fragment-ktx:2.3.1'
+                implementation 'androidx.navigation:navigation-ui-ktx:2.3.1'
 
                 // Network stuff
                 implementation 'com.google.code.gson:gson:2.8.6'
@@ -158,7 +158,7 @@ subprojects {
                 implementation('com.squareup.retrofit2:retrofit:2.9.0') {
                     exclude group: 'squareup.okhttp3', module: 'okhttp'
                 }
-                implementation 'com.squareup.okhttp3:okhttp:4.7.2'
+                implementation 'com.squareup.okhttp3:okhttp:4.9.0'
                 implementation 'com.squareup.okhttp3:logging-interceptor:4.7.2'
                 implementation 'com.squareup.retrofit2:converter-scalars:2.5.0'
 
@@ -175,6 +175,9 @@ subprojects {
                 // Images
                 implementation "io.coil-kt:coil:0.13.0"
                 implementation "io.coil-kt:coil-video:0.13.0"
+
+                // Contextual actionbar
+                implementation 'com.afollestad:material-cab:2.0.1'
 
                 if (isAndroidProject) {
                     implementation project(':common')

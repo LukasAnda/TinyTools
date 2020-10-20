@@ -16,13 +16,20 @@ import androidx.recyclerview.widget.GridLayoutManager
 import coil.load
 import coil.request.CachePolicy
 import coil.transform.CircleCropTransformation
+import com.afollestad.materialcab.attached.AttachedCab
+import com.afollestad.materialcab.attached.destroy
+import com.afollestad.materialcab.attached.isActive
+import com.afollestad.materialcab.createCab
 import com.tinytools.common.fragments.BaseFragment
 import com.tinytools.common.helpers.getNavigationResult
 import com.tinytools.common.helpers.onBackPressedTwiceFinish
 import com.tinytools.common.model.Event
-import com.tinytools.common.recyclical.datasource.dataSourceOf
+import com.tinytools.common.recyclical.datasource.selectableDataSourceOf
+import com.tinytools.common.recyclical.datasource.selectableDataSourceTypedOf
 import com.tinytools.common.recyclical.handle.RecyclicalHandle
 import com.tinytools.common.recyclical.setup
+import com.tinytools.common.recyclical.viewholder.hasSelection
+import com.tinytools.common.recyclical.viewholder.isSelected
 import com.tinytools.common.recyclical.withItem
 import com.tinytools.common.views.DrawerView
 import com.tinytools.files.R
@@ -46,7 +53,11 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
     override fun getViewBinding() = FilesFragmentBinding.inflate(layoutInflater)
     private val viewModel by viewModel<FilesFragmentViewModel>()
 
-    private var directoryItems = dataSourceOf()
+    private var directoryItems = selectableDataSourceTypedOf<HybridFileItem>().apply {
+        onSelectionChange { invalidateCab() }
+    }
+
+    private var cab: AttachedCab? = null
 
     private var recyclicalHandle: RecyclicalHandle? = null
     private var manager: GridLayoutManager? = null
@@ -75,6 +86,10 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
 
         activity?.onBackPressedDispatcher?.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                if(directoryItems.hasSelection()) {
+                    directoryItems.deselectAll()
+                    return
+                }
                 if (closeDrawerIfPossible()) return
                 if (!viewModel.navigateUp()) {
                     activity?.onBackPressedTwiceFinish(R.string.exit_app_prompt)
@@ -231,10 +246,20 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
                                 }
                         )
                     }
+
+                    binding.root.setBackgroundColor(if(isSelected()) Color.parseColor("#e0e0e0") else Color.TRANSPARENT)
                 }
 
                 onClick {
-                    viewModel.listFiles(item.file)
+                    if (hasSelection()) {
+                        toggleSelection()
+                    } else {
+                        viewModel.listFiles(item.file)
+                    }
+                }
+
+                onLongClick {
+                    toggleSelection()
                 }
             }
 
@@ -260,10 +285,20 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
                                 }
                         )
                     }
+
+                    binding.root.setBackgroundColor(if(isSelected()) Color.parseColor("#e0e0e0") else Color.TRANSPARENT)
                 }
 
                 onClick {
-                    viewModel.listFiles(item.file)
+                    if (hasSelection()) {
+                        toggleSelection()
+                    } else {
+                        viewModel.listFiles(item.file)
+                    }
+                }
+
+                onLongClick {
+                    toggleSelection()
                 }
             }
         }
@@ -277,10 +312,33 @@ class FilesFragment : BaseFragment<FilesFragmentBinding>(), DrawerView.DrawerHan
         return false
     }
 
+    private fun invalidateCab() {
+        if (directoryItems.hasSelection()) {
+            if (cab.isActive()) {
+                cab?.apply {
+                    title(literal = getString(R.string.x_items, directoryItems.getSelectionCount()))
+                }
+            } else {
+                cab = createCab(R.id.cab_stub) {
+                    title(literal = getString(R.string.x_items, directoryItems.getSelectionCount()))
+                    backgroundColor(literal = Color.BLACK)
+                    fadeIn()
+                    onDestroy {
+                        directoryItems.deselectAll()
+                        true
+                    }
+                }
+            }
+        } else {
+            cab.destroy()
+        }
+    }
+
     private fun manageSortType() {
         findNavController().navigate(FilesFragmentDirections.actionFilesFragmentToSortDialog())
 
         getNavigationResult<SortDialog.SortDialogResult>(R.id.filesFragment, SORT_BY_KEY) {
+            directoryItems.deselectAll()
             viewModel.changeSortStyle(it.sortType, it.sortOrder)
         }
     }
